@@ -1,0 +1,136 @@
+:root {
+    --background-color: 255, 239, 188;
+    --template-color: 213, 209, 255;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    overflow: hidden;
+    background-color: rgb(var(--background-color));
+}
+
+.deck {
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.card-container {
+    position: absolute;
+    perspective: 1000px;
+}
+
+.card-container-inner {
+    transform: rotateY(180deg);
+    transform-style: preserve-3d;
+    transition: transform 0.8s;
+}
+
+.card {
+    cursor: pointer;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    width: 6rem;
+    height: 8rem;
+    background-color: white;
+    border: 1px solid black;
+    border-radius: 5px;
+    padding: 0.1rem;
+    font-weight: bold;
+    box-sizing: border-box;
+    overflow: hidden;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    user-select: none;
+
+    &.black {
+        color: black;
+    }
+
+    &.red {
+        color: red;
+    }
+
+    &.back {
+        position: absolute;
+        inset: 0;
+        transform: rotateY(180deg);
+        background-size: cover;
+
+        &.black {
+            background-image: url(/assets/card-black.webp);
+        }
+
+        &.red {
+            background-image: url(/assets/card-red.webp);
+        }
+    }
+}
+
+.card-label {
+    display: flex;
+    flex-direction: column;
+    letter-spacing: -2px;
+
+    span {
+        width: 1rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    &.left {
+        align-self: flex-start;
+    }
+    
+    &.right {
+        flex-direction: column-reverse;
+        align-self: flex-end;
+
+        span {
+            padding-right: 0.1rem;
+        }
+    }
+}
+
+.card-center {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    inset: 0;
+    font-size: 1.5rem;
+
+    span {
+        position: absolute;
+    }
+}
+
+/// m = middle, t = top, b = bottom, l = left, r = right
+.middle { top: 50%; left: 50%; transform: translate(-50%, -50%); }
+.top    { top: 25%; left: 50%; transform: translate((-50%, -50%)); }
+.bottom { top: 75%; left: 50%; transform: translate((-50%, -50%)); }
+
+.tl { top: 25%; left: 30%; transform: translate((-50%, -50%)); }
+.tr { top: 25%; left: 70%; transform: translate((-50%, -50%)); }
+.bl { top: 75%; left: 30%; transform: translate((-50%, -50%)); }
+.br { top: 75%; left: 70%; transform: translate((-50%, -50%)); }
+.ml { top: 50%; left: 30%; transform: translate(-50%, -50%); }
+.mr { top: 50%; left: 70%; transform: translate(-50%, -50%); }
+.tm { top: 38%; left: 50%; transform: translate((-50%, -50%)); }
+
+.mtl { top: 42%; left: 30%; transform: translate(-50%, -50%); }
+.mtr { top: 42%; left: 70%; transform: translate(-50%, -50%); }
+.mbl { top: 58%; left: 30%; transform: translate(-50%, -50%); }
+.mbr { top: 58%; left: 70%; transform: translate(-50%, -50%); }
+.mtm { top: 35%; left: 50%; transform: translate((-50%, -50%)); }
+.mbm { top: 68%; left: 50%; transform: translate((-50%, -50%)); }
+
+.middle-big {
+    @extend .middle;
+
+    font-size: 3rem;
+};
