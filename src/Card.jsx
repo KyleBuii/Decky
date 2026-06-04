@@ -1,10 +1,13 @@
-import { memo, useRef } from 'react';
+import { memo, useRef, useState } from 'react';
 
 const Card = ({ label, suit, suitsMiddle, color, art = '' }) => {
+    const [cardPrevPosition, setCardPrevPosition] = useState([0, 0]);
+    const refIsMouseClick = useRef(false);
     const refIsDragging = useRef(false);
+    const refIsClick = useRef(false);
 
     const handleCardClick = (event) => {
-        if (refIsDragging.current) return;
+        refIsClick.current = false;
 
         const cardInner = event.currentTarget.firstChild;
         if (cardInner.style.transform === 'unset') {
@@ -15,14 +18,27 @@ const Card = ({ label, suit, suitsMiddle, color, art = '' }) => {
     };
     
     const handleMouseUp = (event) => {
+        refIsMouseClick.current = false;
         refIsDragging.current = false;
+        if (refIsClick.current) handleCardClick(event);
     };
 
     const handleMouseDown = (event) => {
-        refIsDragging.current = true;
+        refIsMouseClick.current = true;
+        refIsDragging.current = false;
+        refIsClick.current = true;
+        setCardPrevPosition([event.clientX, event.clientY]);
     };
 
     const handleMouseMove = (event) => {
+        const positionDiffX = Math.abs(event.clientX - cardPrevPosition[0]);
+        const positionDiffY = Math.abs(event.clientY - cardPrevPosition[1]);
+
+        if (refIsMouseClick.current && ((positionDiffX > 5) || (positionDiffY > 5))) {
+            refIsDragging.current = true;
+            refIsClick.current = false;
+        };
+
         if (!refIsDragging.current) return;
 
         const card = event.currentTarget;
@@ -40,7 +56,6 @@ const Card = ({ label, suit, suitsMiddle, color, art = '' }) => {
 
     return (
         <section className='card-container'
-            onClick={handleCardClick}
             onMouseUp={handleMouseUp}
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
