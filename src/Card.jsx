@@ -1,10 +1,13 @@
 import { memo, useRef, useState } from 'react';
 
-const Card = ({ label, suit, suitsMiddle, color, art = '' }) => {
-    const [cardPrevPosition, setCardPrevPosition] = useState([0, 0]);
-    const refIsMouseClick = useRef(false);
-    const refIsDragging = useRef(false);
-    const refIsClick = useRef(false);
+const Card = ({ label, suit, suitsMiddle, color, order, art = '' }) => {
+    const [mousePosition, setMousePosition] = useState([0, 0]); /// Determines click or drag
+    const [cardDragStartPosition, setCardDragStartPosition] = useState([0, 0]);
+    const [cardPosition, setCardPosition] = useState([0, 0]);
+
+    const refIsMouseClick = useRef(false);  /// If card was clicked
+    const refIsDragging = useRef(false);    /// If card is dragging
+    const refIsClick = useRef(false);       /// If card is clicked
 
     const handleCardClick = (event) => {
         refIsClick.current = false;
@@ -27,39 +30,35 @@ const Card = ({ label, suit, suitsMiddle, color, art = '' }) => {
         refIsMouseClick.current = true;
         refIsDragging.current = false;
         refIsClick.current = true;
-        setCardPrevPosition([event.clientX, event.clientY]);
+
+        setMousePosition([event.clientX, event.clientY]);
+        setCardDragStartPosition([...cardPosition]);
     };
 
     const handleMouseMove = (event) => {
-        const positionDiffX = Math.abs(event.clientX - cardPrevPosition[0]);
-        const positionDiffY = Math.abs(event.clientY - cardPrevPosition[1]);
+        const deltaX = event.clientX - mousePosition[0];
+        const deltaY = event.clientY - mousePosition[1];
 
-        if (refIsMouseClick.current && ((positionDiffX > 5) || (positionDiffY > 5))) {
+        if (refIsMouseClick.current && ((Math.abs(deltaX) > 5) || (Math.abs(deltaY) > 5))) {
             refIsDragging.current = true;
             refIsClick.current = false;
         };
 
         if (!refIsDragging.current) return;
 
-        const card = event.currentTarget;
-        const cardRect = card.getBoundingClientRect();
-        const cardWidth = cardRect.width;
-        const cardHeight = cardRect.height;
-        const posX = event.clientX - (cardWidth / 2);
-        const posY = event.clientY - (cardHeight / 2);
-        card.style.transform = `translate(${posX}px, ${posY}px)`;
-    };
+        const posX = cardDragStartPosition[0] + deltaX;
+        const posY = cardDragStartPosition[1] + deltaY;
 
-    const handleMouseLeave = (event) => {
-        refIsDragging.current = false;
+        setCardPosition([posX, posY]);
+        event.currentTarget.style.transform = `translate(${posX}px, ${posY}px)`;
     };
 
     return (
         <section className='card-container'
+            style={{ zIndex: order }}
             onMouseUp={handleMouseUp}
             onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseLeave={handleMouseLeave}>
+            onMouseMove={handleMouseMove}>
             <div className='card-container-inner'>
                 <div className={`card front ${color} ${art === '' ? '' : art}`}>
                     <div className='card-label left'>
