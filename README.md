@@ -1,2 +1,2 @@
 # [Decky](https://decky-decky.vercel.app/)
-Web application of playing cards.
+Decky is a playing card playground.

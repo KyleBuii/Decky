@@ -12,6 +12,8 @@ body {
 
 .deck {
     position: relative;
+    top: 1rem;
+    left: 1rem;
     display: flex;
     flex-direction: row;
     gap: 0.5rem;
@@ -20,11 +22,26 @@ body {
 
 .deck-front {
     z-index: 999;
+    position: relative;
     width: 6.125rem;
     height: 8.125rem;
     border: 1px solid #000000;
+    border-bottom: none;
     border-radius: 2px;
     background-image: url(/assets/deck-front.webp);
+
+    &::before {
+        content: '';
+        position: absolute;
+        left: -1px;
+        bottom: -0.6rem;
+        width: calc(6.125rem + 2px);
+        height: 0.6rem;
+        background-color: white;
+        border: 1px solid black;
+        border-top: 1px solid rgba(0, 0, 0, 0.3);
+        box-sizing: border-box;
+    }
 }
 
 .cards {
