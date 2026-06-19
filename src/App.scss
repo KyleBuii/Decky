@@ -20,6 +20,13 @@ body {
     flex-wrap: wrap;
 }
 
+.deck-start {
+    visibility: hidden;
+    pointer-events: none;
+    position: absolute;
+    color: #ffadad;
+}
+
 .deck-front {
     z-index: 999;
     position: relative;

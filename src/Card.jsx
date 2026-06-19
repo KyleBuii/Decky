@@ -1,6 +1,6 @@
 import { memo, useRef, useState } from 'react';
 
-const Card = ({ label, suit, suitsMiddle, color, order, art = '' }) => {
+const Card = ({ label, suit, suitsMiddle, color, order, onBringCardToFront, art = '' }) => {
     const [mousePosition, setMousePosition] = useState([0, 0]); /// Determines click or drag
     const [cardDragStartPosition, setCardDragStartPosition] = useState([0, 0]);
     const [cardPosition, setCardPosition] = useState([0, 0]);
@@ -27,6 +27,8 @@ const Card = ({ label, suit, suitsMiddle, color, order, art = '' }) => {
     };
 
     const handleMouseDown = (event) => {
+        onBringCardToFront();
+
         refIsMouseClick.current = true;
         refIsDragging.current = false;
         refIsClick.current = true;
@@ -36,10 +38,12 @@ const Card = ({ label, suit, suitsMiddle, color, order, art = '' }) => {
     };
 
     const handleMouseMove = (event) => {
+        if (!refIsMouseClick.current) return;
+
         const deltaX = event.clientX - mousePosition[0];
         const deltaY = event.clientY - mousePosition[1];
 
-        if (refIsMouseClick.current && ((Math.abs(deltaX) > 5) || (Math.abs(deltaY) > 5))) {
+        if ((Math.abs(deltaX) > 5) || (Math.abs(deltaY) > 5)) {
             refIsDragging.current = true;
             refIsClick.current = false;
         };

@@ -1,4 +1,6 @@
 import { memo, useRef, useState } from 'react';
+import { IconContext } from 'react-icons';
+import { IoIosMove } from 'react-icons/io';
 import Card from './Card';
 
 const labels = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
@@ -24,31 +26,50 @@ const suitsMiddle = {
     K  : ['middle-big'],
 };
 const cards = suits.flatMap(({ suit, color }) =>
-    labels.map((label) => ({
+    labels.map((label, labelIndex) => ({
         label,
         suit,
         suitsMiddle: suitsMiddle[label],
         color,
+        order: labelIndex,
     }))
 );
+const mouseDragDirections = {
+    '100110011001': 'shuffle',
+    '011001100110': 'shuffle',
+    '110011001100': 'spread',
+    '001100110011': 'spread',
+};
+const mouseDragLimit = 40;
+const mouseDragCountLimit = 6;
 
 const Deck = () => {
     const [mousePosition, setMousePosition] = useState([0, 0]); /// Determines click or drag
+    const [deckCards, setDeckCards] = useState(cards);
     const [deckDragStartPosition, setDeckDragStartPosition] = useState([0, 0]);
-    const [deckPosition, setDeckPosition] = useState([0, 0]);
+
+    const refCards = useRef(null);
+    const refCardsDragger = useRef(null);
+    const refDeckPosition = useRef([0, 0]);
+    const refDeckStart = useRef(null);
+    const refDeckFront = useRef(null);
 
     const refIsMouseClick = useRef(false);  /// If deck was clicked
     const refIsDragging = useRef(false);    /// If deck is dragging
     const refIsClick = useRef(false);       /// If deck is clicked
-    const refCards = useRef(null);
-    const refCardsDragger = useRef(null);
-    const refDeckFront = useRef(null);
     const refIsCardsDragging = useRef(false);
     const refIsCardsStored = useRef(true);
 
+    const refMouseDragCoords = useRef([]);     /// Stores mouse coords in the format: [1, 1] = up, [0, 1] = right, [0, 0] = down, [1, 0] = left
+    const refMouseDragCount = useRef(0);
+
     const handleMouseUp = (event) => {
+        refDeckStart.current.style.visibility = 'hidden';
+        refMouseDragCoords.current.length = 0;
+        
         refIsMouseClick.current = false;
         refIsDragging.current = false;
+
         if (refIsClick.current) handleClickDeckFront(event);
     };
 
@@ -69,19 +90,30 @@ const Deck = () => {
     };
 
     const handleMouseDown = (event) => {
+        refDeckStart.current.style.visibility = 'visible';
+
+        const deckStartRect = refDeckStart.current.getBoundingClientRect();
+        const parentRect = refDeckStart.current.parentElement.getBoundingClientRect();
+
+        const posX = (event.clientX - parentRect.left) - (deckStartRect.width / 2);
+        const posY = (event.clientY - parentRect.top) - (deckStartRect.height / 2);
+        refDeckStart.current.style.transform = `translate(${posX}px, ${posY}px)`;
+
         refIsMouseClick.current = true;
         refIsDragging.current = false;
         refIsClick.current = true;
 
         setMousePosition([event.clientX, event.clientY]);
-        setDeckDragStartPosition([...deckPosition]);
+        setDeckDragStartPosition([...refDeckPosition.current]);
     };
 
     const handleMouseMove = (event) => {
+        if (!refIsMouseClick.current) return;
+
         const deltaX = event.clientX - mousePosition[0];
         const deltaY = event.clientY - mousePosition[1];
 
-        if (refIsMouseClick.current && ((Math.abs(deltaX) > 5) || (Math.abs(deltaY) > 5))) {
+        if ((Math.abs(deltaX) > 5) || (Math.abs(deltaY) > 5)) {
             refIsDragging.current = true;
             refIsClick.current = false;
         };
@@ -91,8 +123,81 @@ const Deck = () => {
         const posX = deckDragStartPosition[0] + deltaX;
         const posY = deckDragStartPosition[1] + deltaY;
 
-        setDeckPosition([posX, posY]);
+        refDeckPosition.current = [posX, posY];
         event.currentTarget.style.transform = `translate(${posX}px, ${posY}px)`;
+
+        const absDeltaX = Math.abs(deltaX);
+        const absDeltaY = Math.abs(deltaY);
+
+        if ((absDeltaX > mouseDragLimit) || (absDeltaY > mouseDragLimit)) {
+            const dragCoords = refMouseDragCoords.current;
+            const coordsLastEntry = dragCoords[dragCoords.length - 1] || [];
+
+            if (absDeltaX > absDeltaY) {
+                if (deltaX < -mouseDragLimit) {
+                    if ((coordsLastEntry[0] === 1) && (coordsLastEntry[1] === 0)) return;
+                    dragCoords.push([1, 0]);
+                    incrementMouseDragCount();
+                } else if (deltaX > mouseDragLimit) {
+                    if ((coordsLastEntry[0] === 0) && (coordsLastEntry[1] === 1)) return;
+                    dragCoords.push([0, 1]);
+                    incrementMouseDragCount();
+                };
+            } else {
+                if (deltaY < -mouseDragLimit) {
+                    if ((coordsLastEntry[0] === 1) && (coordsLastEntry[1] === 1)) return;
+                    dragCoords.push([1, 1]);
+                    incrementMouseDragCount();
+                } else if (deltaY > mouseDragLimit) {
+                    if ((coordsLastEntry[0] === 0) && (coordsLastEntry[1] === 0)) return;
+                    dragCoords.push([0, 0]);
+                    incrementMouseDragCount();
+                };
+            };
+        };
+    };
+
+    const incrementMouseDragCount = () => {
+        refMouseDragCount.current += 1;
+
+        if (refMouseDragCount.current !== mouseDragCountLimit) return;
+        refMouseDragCount.current = 0;
+    
+        const directionCode = refMouseDragCoords.current.flat().join('');
+        const direction = mouseDragDirections[directionCode];
+        refMouseDragCoords.current.length = 0;
+
+        handleDragDirection(direction);
+    };
+
+    const handleDragDirection = (direction) => {
+        switch (direction) {
+            case 'shuffle':
+                shuffleDeck();
+                break;
+            case 'spread':
+                break;
+            default: break;
+        };
+    };
+
+    const shuffleDeck = () => {
+        setDeckCards((prev) => {
+            const shuffled = [...prev];
+            let currentIndex = shuffled.length;
+
+            while (currentIndex !== 0) {
+                let randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+
+                [shuffled[currentIndex], shuffled[randomIndex]] = [shuffled[randomIndex], shuffled[currentIndex]];
+            };
+
+            return shuffled.map((card, index) => ({
+                ...card,
+                order: index,
+            }));
+        });
     };
     
     const handleMouseClickCards = () => {
@@ -115,8 +220,26 @@ const Deck = () => {
         refCards.current.style.transform = `translate(${posX}px, ${posY}px)`;
     };
 
+    const bringCardToFront = (clickedIndex) => {
+        setDeckCards((prev) => {
+            const highestOrder = Math.max(...prev.map((card) => card.order));
+
+            return prev.map((card, index) =>
+                (index === clickedIndex)
+                    ? { ...card, order: highestOrder + 1 }
+                    : card
+            );
+        });
+    };
+
     return (
         <section className='deck'>
+            <div ref={refDeckStart}
+                className='deck-start'>
+                <IconContext.Provider value={{ size: '4rem', color: '#ffadad', className: 'global-class-name' }}>
+                    <IoIosMove/>
+                </IconContext.Provider>
+            </div>
             <div ref={refDeckFront}
                 className='deck-front'
                 onMouseUp={handleMouseUp}
@@ -129,12 +252,13 @@ const Deck = () => {
                     onClick={handleMouseClickCards}
                     onMouseMove={handleMouseMoveCards}>
                 </div>
-                {cards.map((c, cn) => {
+                {deckCards.map((c, cn) => {
                     return <Card label={c.label}
                         suit={c.suit}
                         suitsMiddle={c.suitsMiddle}
                         color={c.color}
-                        order={cn}
+                        order={c.order}
+                        onBringCardToFront={() => bringCardToFront(cn)}
                         key={`deck 1 card ${cn}`}/>
                 })}
             </div>
