@@ -3,6 +3,7 @@ import { IconContext } from 'react-icons';
 import { IoIosMove } from 'react-icons/io';
 import Card from './Card';
 
+const cardSize = [96, 128];
 const labels = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
 const suits = [
     { suit: '&clubs;'  , color: 'black' },
@@ -32,6 +33,12 @@ const cards = suits.flatMap(({ suit, color }) =>
         suitsMiddle: suitsMiddle[label],
         color,
         order: labelIndex,
+        forcedPosition: [],
+        resetId: 0,
+        defaultPosition: [
+            (labelIndex % 5) * cardSize[0],
+            Math.floor(labelIndex / 5) * cardSize[1],
+        ],
     }))
 );
 const mouseDragDirections = {
@@ -176,6 +183,7 @@ const Deck = () => {
                 shuffleDeck();
                 break;
             case 'spread':
+                spreadDeck();
                 break;
             default: break;
         };
@@ -198,6 +206,18 @@ const Deck = () => {
                 order: index,
             }));
         });
+    };
+
+    const spreadDeck = () => {
+        setDeckCards((cards) =>
+            cards.map((card) => {
+                return {
+                    ...card,
+                    forcedPosition: card.defaultPosition,
+                    resetId: card.resetId + 1,
+                }
+            })
+        );
     };
     
     const handleMouseClickCards = () => {
@@ -259,6 +279,8 @@ const Deck = () => {
                         color={c.color}
                         order={c.order}
                         onBringCardToFront={() => bringCardToFront(cn)}
+                        forcedPosition={c.forcedPosition}
+                        resetId={c.resetId}
                         key={`deck 1 card ${cn}`}/>
                 })}
             </div>

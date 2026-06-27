@@ -1,13 +1,22 @@
-import { memo, useRef, useState } from 'react';
+import { memo, useEffect, useRef } from 'react';
 
-const Card = ({ label, suit, suitsMiddle, color, order, onBringCardToFront, art = '' }) => {
-    const [mousePosition, setMousePosition] = useState([0, 0]); /// Determines click or drag
-    const [cardDragStartPosition, setCardDragStartPosition] = useState([0, 0]);
-    const [cardPosition, setCardPosition] = useState([0, 0]);
+const Card = ({ label, suit, suitsMiddle, color, order, onBringCardToFront, forcedPosition, resetId, art = '' }) => {
+    const refCard = useRef(null);
+
+    const refMousePosition = useRef([0, 0]); /// Determines click or drag
+    const refCardDragStartPosition = useRef([0, 0]);
+    const refCardPosition = useRef([0, 0]);
 
     const refIsMouseClick = useRef(false);  /// If card was clicked
     const refIsDragging = useRef(false);    /// If card is dragging
     const refIsClick = useRef(false);       /// If card is clicked
+
+    useEffect(() => {
+        if (forcedPosition.length === 0) return;
+
+        refCardPosition.current = forcedPosition;
+        refCard.current.style.transform = `translate(${forcedPosition[0]}px, ${forcedPosition[1]}px)`;
+    }, [resetId]);
 
     const handleCardClick = (event) => {
         refIsClick.current = false;
@@ -33,15 +42,15 @@ const Card = ({ label, suit, suitsMiddle, color, order, onBringCardToFront, art 
         refIsDragging.current = false;
         refIsClick.current = true;
 
-        setMousePosition([event.clientX, event.clientY]);
-        setCardDragStartPosition([...cardPosition]);
+        refMousePosition.current = [event.clientX, event.clientY];
+        refCardDragStartPosition.current = [...refCardPosition.current];
     };
 
     const handleMouseMove = (event) => {
         if (!refIsMouseClick.current) return;
 
-        const deltaX = event.clientX - mousePosition[0];
-        const deltaY = event.clientY - mousePosition[1];
+        const deltaX = event.clientX - refMousePosition.current[0];
+        const deltaY = event.clientY - refMousePosition.current[1];
 
         if ((Math.abs(deltaX) > 5) || (Math.abs(deltaY) > 5)) {
             refIsDragging.current = true;
@@ -50,15 +59,16 @@ const Card = ({ label, suit, suitsMiddle, color, order, onBringCardToFront, art 
 
         if (!refIsDragging.current) return;
 
-        const posX = cardDragStartPosition[0] + deltaX;
-        const posY = cardDragStartPosition[1] + deltaY;
+        const posX = refCardDragStartPosition.current[0] + deltaX;
+        const posY = refCardDragStartPosition.current[1] + deltaY;
 
-        setCardPosition([posX, posY]);
+        refCardPosition.current = [posX, posY];
         event.currentTarget.style.transform = `translate(${posX}px, ${posY}px)`;
     };
 
     return (
-        <section className='card-container'
+        <section ref={refCard}
+            className='card-container'
             style={{ zIndex: order }}
             onMouseUp={handleMouseUp}
             onMouseDown={handleMouseDown}
