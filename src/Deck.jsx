@@ -4,6 +4,7 @@ import { IoIosMove } from 'react-icons/io';
 import Card from './Card';
 
 const cardSize = [96, 128];
+const cardSpreadGap = 5;
 const labels = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
 const suits = [
     { suit: '&clubs;'  , color: 'black' },
@@ -36,8 +37,8 @@ const cards = suits.flatMap(({ suit, color }) =>
         forcedPosition: [],
         resetId: 0,
         defaultPosition: [
-            (labelIndex % 5) * cardSize[0],
-            Math.floor(labelIndex / 5) * cardSize[1],
+            (labelIndex % 5) * (cardSize[0] + cardSpreadGap),
+            Math.floor(labelIndex / 5) * (cardSize[1] + cardSpreadGap),
         ],
     }))
 );
@@ -181,12 +182,21 @@ const Deck = () => {
         switch (direction) {
             case 'shuffle':
                 shuffleDeck();
+                playDragAnimation();
                 break;
             case 'spread':
                 spreadDeck();
+                playDragAnimation();
                 break;
             default: break;
         };
+    };
+
+    const playDragAnimation = () => {
+        refDeckFront.current.style.animation = '';
+        window.requestAnimationFrame(() => {
+            refDeckFront.current.style.animation = '0.8s deckConfirmedMotion 2 alternate'; 
+        });
     };
 
     const shuffleDeck = () => {

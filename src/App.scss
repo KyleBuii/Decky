@@ -181,3 +181,8 @@ body {
 
     font-size: 3rem;
 };
+
+@keyframes deckConfirmedMotion {
+    from { box-shadow: none; }
+    to { box-shadow: 0px 0px 40px #ff0000; }
+}
