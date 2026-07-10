@@ -3,45 +3,6 @@ import { IconContext } from 'react-icons';
 import { IoIosMove } from 'react-icons/io';
 import Card from './Card';
 
-const cardSize = [96, 128];
-const cardSpreadGap = 5;
-const labels = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
-const suits = [
-    { suit: '&clubs;'  , color: 'black' },
-    { suit: '&diams;'  , color: 'red'   },
-    { suit: '&hearts;' , color: 'red'   },
-    { suit: '&spades;' , color: 'black' },
-];
-const suitsMiddle = {
-    A  : ['middle'],
-    2  : ['top', 'bottom'],
-    3  : ['top', 'middle', 'bottom'],
-    4  : ['tl', 'tr', 'bl', 'br'],
-    5  : ['tl', 'tr', 'middle', 'bl', 'br'],
-    6  : ['tl', 'tr', 'ml', 'mr', 'bl', 'br'],
-    7  : ['tl', 'tr', 'tm', 'ml', 'mr', 'bl', 'br'],
-    8  : ['tl', 'tr', 'mtl', 'mtr', 'mbl', 'mbr', 'bl', 'br'],
-    9  : ['tl', 'tr', 'mtl', 'mtr', 'middle', 'mbl', 'mbr', 'bl', 'br'],
-    10 : ['tl', 'tr', 'mtm', 'mtl', 'mtr', 'mbl', 'mbr', 'mbm', 'bl', 'br'],
-    J  : ['middle-big'],
-    Q  : ['middle-big'],
-    K  : ['middle-big'],
-};
-const cards = suits.flatMap(({ suit, color }) =>
-    labels.map((label, labelIndex) => ({
-        label,
-        suit,
-        suitsMiddle: suitsMiddle[label],
-        color,
-        order: labelIndex,
-        forcedPosition: [],
-        resetId: 0,
-        defaultPosition: [
-            (labelIndex % 5) * (cardSize[0] + cardSpreadGap),
-            Math.floor(labelIndex / 5) * (cardSize[1] + cardSpreadGap),
-        ],
-    }))
-);
 const mouseDragDirections = {
     '100110011001': 'shuffle',
     '011001100110': 'shuffle',
@@ -51,7 +12,7 @@ const mouseDragDirections = {
 const mouseDragLimit = 40;
 const mouseDragCountLimit = 6;
 
-const Deck = () => {
+const Deck = ({ cards, cover = '' }) => {
     const [mousePosition, setMousePosition] = useState([0, 0]); /// Determines click or drag
     const [deckCards, setDeckCards] = useState(cards);
     const [deckDragStartPosition, setDeckDragStartPosition] = useState([0, 0]);
@@ -271,6 +232,7 @@ const Deck = () => {
                 </IconContext.Provider>
             </div>
             <div ref={refDeckFront}
+                style={{ backgroundImage: `url(/assets/deck-${cover ? `${cover}-` : ''}front.webp)` }}
                 className='deck-front'
                 onMouseUp={handleMouseUp}
                 onMouseDown={handleMouseDown}
@@ -282,7 +244,7 @@ const Deck = () => {
                     onClick={handleMouseClickCards}
                     onMouseMove={handleMouseMoveCards}>
                 </div>
-                {deckCards.map((c, cn) => {
+                {deckCards?.map((c, cn) => {
                     return <Card label={c.label}
                         suit={c.suit}
                         suitsMiddle={c.suitsMiddle}

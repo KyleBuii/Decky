@@ -10,6 +10,12 @@ body {
     margin: 0;
 }
 
+.decks {
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+}
+
 .deck {
     position: relative;
     top: 1rem;
@@ -35,7 +41,6 @@ body {
     border: 1px solid #000000;
     border-bottom: none;
     border-radius: 2px;
-    background-image: url(/assets/deck-front.webp);
 
     &::before {
         content: '';
