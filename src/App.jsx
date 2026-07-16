@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import Deck from './Deck';
 
 const cardSize = [96, 128];
@@ -44,7 +44,7 @@ const cards = suits.flatMap(({ suit, color }) =>
 const cardsGameSelect = [
     {
         label: 'Blackjack 21',
-        suit: '&clubs;',
+        suit: '&spades;',
         suitsMiddle: suitsMiddle['J'],
         color: 'black',
         order: 0,
@@ -58,12 +58,49 @@ const cardsGameSelect = [
 ];
 
 const App = () => {
+    const [deckOrder, setDeckOrder] = useState([]);
+
+    const refDecks = useRef(null);
+
+    useEffect(() => {
+        const newDeckOrder = Array.from({ length: refDecks.current.children.length }, (_, i) => i + 1);
+        setDeckOrder(newDeckOrder);
+    }, []);
+
+    const updateDeckOrder = (deckIndex) => {
+        const highestOrder = Math.max(...deckOrder);
+        const clickedDeckOrder = deckOrder[deckIndex];
+
+        if (clickedDeckOrder === highestOrder) return;
+
+        setDeckOrder((prev) => {
+            const newDeckOrder = [...prev].map((order) => order - 1);
+
+            if (clickedDeckOrder !== 1) {
+                const indexOne = prev.indexOf(1);
+                newDeckOrder[indexOne] = clickedDeckOrder - 1;
+            };
+
+            newDeckOrder[deckIndex] = highestOrder;
+
+            return newDeckOrder;
+        });
+    };
+
     return (
         <section>
             <section className='deck-templates'></section>
-            <section className='decks'>
-                <Deck cards={cards}/>
-                <Deck cover='game-select'/>
+            <section ref={refDecks}
+                className='decks'>
+                <Deck number={0}
+                    cards={cards}
+                    order={deckOrder[0]}
+                    updateOrder={updateDeckOrder}/>
+                <Deck number={1}
+                    cards={cardsGameSelect}
+                    order={deckOrder[1]}
+                    updateOrder={updateDeckOrder}
+                    cover='game-select'/>
             </section>
         </section>
     );

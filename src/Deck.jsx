@@ -12,11 +12,12 @@ const mouseDragDirections = {
 const mouseDragLimit = 40;
 const mouseDragCountLimit = 6;
 
-const Deck = ({ cards, cover = '' }) => {
+const Deck = ({ number, cards, order, updateOrder, cover = '' }) => {
     const [mousePosition, setMousePosition] = useState([0, 0]); /// Determines click or drag
     const [deckCards, setDeckCards] = useState(cards);
     const [deckDragStartPosition, setDeckDragStartPosition] = useState([0, 0]);
 
+    const refDeck = useRef(null);
     const refCards = useRef(null);
     const refCardsDragger = useRef(null);
     const refDeckPosition = useRef([0, 0]);
@@ -29,7 +30,7 @@ const Deck = ({ cards, cover = '' }) => {
     const refIsCardsDragging = useRef(false);
     const refIsCardsStored = useRef(true);
 
-    const refMouseDragCoords = useRef([]);     /// Stores mouse coords in the format: [1, 1] = up, [0, 1] = right, [0, 0] = down, [1, 0] = left
+    const refMouseDragCoords = useRef([]); /// Stores mouse coords in the format: [1, 1] = up, [0, 1] = right, [0, 0] = down, [1, 0] = left
     const refMouseDragCount = useRef(0);
 
     const handleMouseUp = (event) => {
@@ -44,7 +45,8 @@ const Deck = ({ cards, cover = '' }) => {
 
     const handleClickDeckFront = (event) => {
         if (refIsCardsStored.current) {
-            setCardsLocation(event.clientX, event.clientY);
+            const deckRect = refDeck.current.getBoundingClientRect();
+            setCardsLocation(event.clientX - deckRect.left, event.clientY - deckRect.top);
 
             refCards.current.style.visibility = 'visible';
             refCardsDragger.current.style.visibility = 'visible';
@@ -74,6 +76,8 @@ const Deck = ({ cards, cover = '' }) => {
 
         setMousePosition([event.clientX, event.clientY]);
         setDeckDragStartPosition([...refDeckPosition.current]);
+
+        updateOrder(number);
     };
 
     const handleMouseMove = (event) => {
@@ -199,7 +203,8 @@ const Deck = ({ cards, cover = '' }) => {
 
     const handleMouseMoveCards = (event) => {
         if (!refIsCardsDragging.current) return;
-        setCardsLocation(event.clientX, event.clientY);
+        const deckRect = refDeck.current.getBoundingClientRect();
+        setCardsLocation(event.clientX - deckRect.left, event.clientY - deckRect.top);
     };
 
     const setCardsLocation = (x, y) => {
@@ -224,7 +229,9 @@ const Deck = ({ cards, cover = '' }) => {
     };
 
     return (
-        <section className='deck'>
+        <section ref={refDeck}
+            className='deck'
+            style={{ zIndex: order }}>
             <div ref={refDeckStart}
                 className='deck-start'>
                 <IconContext.Provider value={{ size: '4rem', color: '#ffadad', className: 'global-class-name' }}>

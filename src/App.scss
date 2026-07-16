@@ -129,7 +129,7 @@ body {
     letter-spacing: -2px;
 
     span {
-        width: 1rem;
+        min-width: 1rem;
         display: flex;
         justify-content: center;
         align-items: center;
@@ -137,6 +137,10 @@ body {
     
     &.left {
         align-self: flex-start;
+        
+        span {
+            align-self: flex-start;
+        }
     }
     
     &.right {
@@ -144,6 +148,7 @@ body {
         align-self: flex-end;
 
         span {
+            align-self: flex-end;
             padding-right: 0.1rem;
         }
     }
