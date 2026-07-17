@@ -39,6 +39,7 @@ const cards = suits.flatMap(({ suit, color }) =>
             (labelIndex % 5) * (cardSize[0] + cardSpreadGap),
             Math.floor(labelIndex / 5) * (cardSize[1] + cardSpreadGap),
         ],
+        flipped: false,
     }))
 );
 const cardsGameSelect = [
@@ -54,6 +55,7 @@ const cardsGameSelect = [
             (cardSize[0] + cardSpreadGap),
             (cardSize[1] + cardSpreadGap),
         ],
+        flipped: true,
     }
 ];
 

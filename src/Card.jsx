@@ -1,6 +1,6 @@
 import { memo, useEffect, useRef } from 'react';
 
-const Card = ({ label, suit, suitsMiddle, color, order, onBringCardToFront, forcedPosition, resetId, art = '' }) => {
+const Card = ({ label, suit, suitsMiddle, color, order, onBringCardToFront, forcedPosition, resetId, flipped, art = '' }) => {
     const refCard = useRef(null);
 
     const refMousePosition = useRef([0, 0]); /// Determines click or drag
@@ -22,11 +22,7 @@ const Card = ({ label, suit, suitsMiddle, color, order, onBringCardToFront, forc
         refIsClick.current = false;
 
         const cardInner = event.currentTarget.firstChild;
-        if (cardInner.style.transform === 'unset') {
-            event.currentTarget.firstChild.style.transform = 'rotateY(180deg)';
-        } else {
-            event.currentTarget.firstChild.style.transform = 'unset';
-        };
+        cardInner.classList.toggle('card-flipped');
     };
     
     const handleMouseUp = (event) => {
@@ -73,7 +69,7 @@ const Card = ({ label, suit, suitsMiddle, color, order, onBringCardToFront, forc
             onMouseUp={handleMouseUp}
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}>
-            <div className='card-container-inner'>
+            <div className={`card-container-inner ${flipped ? 'card-flipped' : ''}`}>
                 <div className={`card front ${color} ${art === '' ? '' : art}`}>
                     <div className='card-label left'>
                         <span>{label}</span>

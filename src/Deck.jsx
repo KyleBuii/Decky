@@ -260,6 +260,7 @@ const Deck = ({ number, cards, order, updateOrder, cover = '' }) => {
                         onBringCardToFront={() => bringCardToFront(cn)}
                         forcedPosition={c.forcedPosition}
                         resetId={c.resetId}
+                        flipped={c.flipped}
                         key={`deck 1 card ${cn}`}/>
                 })}
             </div>
