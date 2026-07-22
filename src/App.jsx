@@ -1,5 +1,6 @@
 import { memo, useEffect, useRef, useState } from 'react';
 import Deck from './Deck';
+import ChipStorage from './ChipStorage';
 
 const cardSize = [96, 128];
 const cardSpreadGap = 5;
@@ -103,6 +104,7 @@ const App = () => {
                     order={deckOrder[1]}
                     updateOrder={updateDeckOrder}
                     cover='game-select'/>
+                <ChipStorage/>
             </section>
         </section>
     );
