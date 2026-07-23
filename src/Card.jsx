@@ -26,13 +26,18 @@ const Card = ({ label, suit, suitsMiddle, color, order, onBringCardToFront, forc
     };
     
     const handleMouseUp = (event) => {
+        refCard.current.style.cursor = 'grab';
+
         refIsMouseClick.current = false;
         refIsDragging.current = false;
+
         if (refIsClick.current) handleCardClick(event);
     };
 
     const handleMouseDown = (event) => {
         onBringCardToFront();
+
+        refCard.current.style.cursor = 'grabbing';
 
         refIsMouseClick.current = true;
         refIsDragging.current = false;

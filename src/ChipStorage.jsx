@@ -1,8 +1,45 @@
 import { memo, useRef, useState } from 'react';
 
 const ChipStorage = () => {
+    const [storagePosition, setStoragePosition] = useState([0, 0]);
+
+    const refMousePosition = useRef([0, 0]);
+    const refStartPosition = useRef([0, 0]);
+    const refChipStorage = useRef(null);
+    const refIsDragging = useRef(false);
+
+    const handleMouseDown = (event) => {
+        refChipStorage.current.style.cursor = 'grabbing';
+        refIsDragging.current = true;
+        refMousePosition.current = [event.clientX, event.clientY];
+        refStartPosition.current = [...storagePosition];
+    };
+
+    const handleMouseUp = () => {
+        refChipStorage.current.style.cursor = 'grab';
+        refIsDragging.current = false;
+    };
+
+    const handleMouseMove = (event) => {
+        if (!refIsDragging.current) return;
+
+        const deltaX = event.clientX - refMousePosition.current[0];
+        const deltaY = event.clientY - refMousePosition.current[1];
+
+        const posX = refStartPosition.current[0] + deltaX;
+        const posY = refStartPosition.current[1] + deltaY;
+
+        setStoragePosition([posX, posY]);
+    };
+
     return (
-        <section className='chip-storage'></section>
+        <section ref={refChipStorage}
+            className='chip-storage'
+            style={{ transform: `translate(${storagePosition[0]}px, ${storagePosition[1]}px)` }}
+            onMouseDown={handleMouseDown}
+            onMouseUp={handleMouseUp}
+            onMouseMove={handleMouseMove}>
+        </section>
     );
 };
 

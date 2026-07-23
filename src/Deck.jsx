@@ -34,7 +34,9 @@ const Deck = ({ number, cards, order, updateOrder, cover = '' }) => {
     const refMouseDragCount = useRef(0);
 
     const handleMouseUp = (event) => {
+        refDeckFront.current.style.cursor = 'grab';
         refDeckStart.current.style.visibility = 'hidden';
+
         refMouseDragCoords.current.length = 0;
         
         refIsMouseClick.current = false;
@@ -54,6 +56,7 @@ const Deck = ({ number, cards, order, updateOrder, cover = '' }) => {
 
             refIsCardsDragging.current = true;
             refIsCardsStored.current = false;
+
         } else {
             refCards.current.style.visibility = 'hidden';
             refIsCardsStored.current = true;
@@ -61,6 +64,7 @@ const Deck = ({ number, cards, order, updateOrder, cover = '' }) => {
     };
 
     const handleMouseDown = (event) => {
+        refDeckFront.current.style.cursor = 'grabbing';
         refDeckStart.current.style.visibility = 'visible';
 
         const deckStartRect = refDeckStart.current.getBoundingClientRect();

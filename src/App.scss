@@ -5,6 +5,8 @@
 
 html {
     cursor: grab;
+         user-select: none;
+    -moz-user-select: none;
 }
 
 body {
@@ -89,7 +91,6 @@ body {
 }
 
 .card {
-    cursor: pointer;
     position: relative;
     display: flex;
     flex-direction: column;
@@ -212,6 +213,8 @@ body {
 }
 
 .chip-storage {
+    display: flex;
+    flex-direction: row;
     position: relative;
     top: 1rem;
     left: 1rem;
@@ -241,6 +244,75 @@ body {
     border-left:   10px solid rgb(244, 191, 139);
     outline: 1px solid black;
     box-shadow: inset 0px 0px 4px black;
+}
+
+/// Chip design by Xingchen Hong [https://codepen.io/Zodiase/pen/adjeVW]
+/// Modified by me
+.chip {
+    position: absolute;
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 3px dashed white;
+    border-radius: 50%;
+
+    &::before {
+        content: '';
+        z-index: -1;
+        position: absolute;
+        inset: 0;
+        margin: -4px;
+        border-radius: 50%;
+    }
+
+    &::after {
+        content: '';
+        z-index: -1;
+        position: absolute;
+        inset: 0;
+        margin: 1px;
+        border: 1px dashed white;
+        border-radius: 50%;
+        background-color: rgba(0, 0, 0, 0.4);
+    }
+
+    //#region Colors
+    &.red {
+        &::before {
+            background-color: red;
+        }
+    }
+
+    &.blue {
+        &::before {
+            background-color: blue;
+        }
+    }
+
+    &.green {
+        &::before {
+            background-color: green;
+        }
+    }
+
+    &.black {
+        &::before {
+            background-color: black;
+        }
+    }
+
+    &.white {
+        border: 3px dashed blue;
+
+        &::before {
+            background-color: white;
+        }
+
+        &::after {
+            border: 1px dashed blue;
+            background-color: unset;
+        }
+    }
+    //#endregion
 }
 
 @keyframes deckConfirmedMotion {
