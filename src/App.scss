@@ -1,6 +1,7 @@
 :root {
     --background-color: 255, 239, 188;
     --template-color: 213, 209, 255;
+    --additional-color: 255, 173, 173;
 }
 
 html {
@@ -14,6 +15,10 @@ body {
     overflow: hidden;
     background-color: rgb(var(--background-color));
     margin: 0;
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: rgb(var(--template-color));
+    text-shadow: 0px 0px 2px rgb(var(--template-color));
 }
 
 .decks {
@@ -47,6 +52,7 @@ body {
     border: 1px solid #000000;
     border-bottom: none;
     border-radius: 2px;
+    background-size: contain;
 
     &::before {
         content: '';
@@ -204,12 +210,16 @@ body {
 
 .slot {
     position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     width: 6rem;
     height: 8rem;
     margin: 1rem;
     border: 3px solid rgb(var(--template-color));
     border-radius: 5px;
     padding: 1px;
+    background-color: rgba(var(--template-color), 0.25);
 }
 
 .chip-storage {
@@ -313,6 +323,50 @@ body {
         }
     }
     //#endregion
+}
+
+.game {
+    position: absolute;
+}
+
+.score {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 6rem;
+    height: 8rem;
+    margin: calc(1rem + 3px);
+    padding: 1px;
+}
+
+.black-jack-21 {
+    .slot {
+        &:nth-child(2), &:nth-child(3) {
+            background-color: rgba(var(--additional-color), 0.25);
+        }
+
+        &:nth-child(1) { /// Begin
+            transform: translateX(14rem);
+        }
+
+        &:nth-child(3) { /// Top right
+            transform: translateX(7rem);
+        }
+        
+        &:nth-child(4) { /// Bottom left
+            transform: translateY(9rem);
+        }
+
+        &:nth-child(5) { /// Bottom right
+            transform: translate(7rem, 9rem);
+        }
+    }
+
+    .score {
+        transform: translate(14rem, 9rem);
+    }
 }
 
 @keyframes deckConfirmedMotion {

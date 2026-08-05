@@ -1,6 +1,7 @@
 import { memo, useEffect, useRef, useState } from 'react';
 import Deck from './Deck';
 import ChipStorage from './ChipStorage';
+import Game from './Game';
 
 const cardSize = [96, 128];
 const cardSpreadGap = 5;
@@ -64,6 +65,7 @@ const App = () => {
     const [deckOrder, setDeckOrder] = useState([]);
 
     const refDecks = useRef(null);
+    const refCurrentDragged = useRef(null);
 
     useEffect(() => {
         const newDeckOrder = Array.from({ length: refDecks.current.children.length }, (_, i) => i + 1);
@@ -90,11 +92,16 @@ const App = () => {
         });
     };
 
+    const updateCurrentDragged = (element) => {
+        refCurrentDragged.current = element;
+    };
+
     return (
         <section>
             <section className='deck-templates'></section>
             <section ref={refDecks}
                 className='decks'>
+                <Game/>
                 <Deck number={0}
                     cards={cards}
                     order={deckOrder[0]}
