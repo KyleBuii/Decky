@@ -12,7 +12,7 @@ const mouseDragDirections = {
 const mouseDragLimit = 40;
 const mouseDragCountLimit = 6;
 
-const Deck = ({ number, cards, order, updateOrder, cover = '' }) => {
+const Deck = ({ number, cards, order, updateOrder, updateCurrentDragged, cover = '' }) => {
     const [mousePosition, setMousePosition] = useState([0, 0]); /// Determines click or drag
     const [deckCards, setDeckCards] = useState(cards);
     const [deckDragStartPosition, setDeckDragStartPosition] = useState([0, 0]);
@@ -57,6 +57,7 @@ const Deck = ({ number, cards, order, updateOrder, cover = '' }) => {
             refIsCardsDragging.current = true;
             refIsCardsStored.current = false;
 
+            updateCurrentDragged(refCards.current);
         } else {
             refCards.current.style.visibility = 'hidden';
             refIsCardsStored.current = true;
@@ -90,7 +91,7 @@ const Deck = ({ number, cards, order, updateOrder, cover = '' }) => {
         const deltaX = event.clientX - mousePosition[0];
         const deltaY = event.clientY - mousePosition[1];
 
-        if ((Math.abs(deltaX) > 5) || (Math.abs(deltaY) > 5)) {
+        if (refIsClick.current && ((Math.abs(deltaX) > 5) || (Math.abs(deltaY) > 5))) {
             refIsDragging.current = true;
             refIsClick.current = false;
         };

@@ -101,15 +101,17 @@ const App = () => {
             <section className='deck-templates'></section>
             <section ref={refDecks}
                 className='decks'>
-                <Game/>
+                <Game currentDragged={refCurrentDragged}/>
                 <Deck number={0}
                     cards={cards}
                     order={deckOrder[0]}
-                    updateOrder={updateDeckOrder}/>
+                    updateOrder={updateDeckOrder}
+                    updateCurrentDragged={updateCurrentDragged}/>
                 <Deck number={1}
                     cards={cardsGameSelect}
                     order={deckOrder[1]}
                     updateOrder={updateDeckOrder}
+                    updateCurrentDragged={updateCurrentDragged}
                     cover='game-select'/>
                 <ChipStorage/>
             </section>
