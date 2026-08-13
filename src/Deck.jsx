@@ -3,16 +3,27 @@ import { IconContext } from 'react-icons';
 import { IoIosMove } from 'react-icons/io';
 import Card from './Card';
 
+/// [1, 1, 1] = up
+/// [0, 1, 1] = up right
+/// [0, 0, 1] = right
+/// [0, 1, 0] = down right
+/// [0, 0, 0] = down
+/// [1, 0, 1] = down left
+/// [1, 0, 0] = left
+/// [1, 1, 0] = up left
 const mouseDragDirections = {
-    '100110011001': 'shuffle',
-    '011001100110': 'shuffle',
-    '110011001100': 'spread',
-    '001100110011': 'spread',
+    '100001100001100001': 'shuffle',  /// left      -> right
+    '001100001100001100': 'shuffle',  /// right     -> left
+    '111000111000111000': 'spread',   /// up        -> down
+    '000111000111000111': 'spread',   /// down      -> up
+    '011101011101011101': 'collapse', /// up right  -> down left
+    '101011101011101011': 'collapse', /// down left -> up right
 };
 const mouseDragLimit = 40;
+const directionDragLimit = 5;
 const mouseDragCountLimit = 6;
 
-const Deck = ({ number, cards, order, updateOrder, updateCurrentDragged, cover = '' }) => {
+const Deck = ({ number, cards, order, updateOrder, updateDragged, updateGame = null, cover = '' }) => {
     const [mousePosition, setMousePosition] = useState([0, 0]); /// Determines click or drag
     const [deckCards, setDeckCards] = useState(cards);
     const [deckDragStartPosition, setDeckDragStartPosition] = useState([0, 0]);
@@ -37,6 +48,7 @@ const Deck = ({ number, cards, order, updateOrder, updateCurrentDragged, cover =
         refDeckFront.current.style.cursor = 'grab';
         refDeckStart.current.style.visibility = 'hidden';
 
+        refMouseDragCount.current = 0;
         refMouseDragCoords.current.length = 0;
         
         refIsMouseClick.current = false;
@@ -57,7 +69,7 @@ const Deck = ({ number, cards, order, updateOrder, updateCurrentDragged, cover =
             refIsCardsDragging.current = true;
             refIsCardsStored.current = false;
 
-            updateCurrentDragged(refCards.current);
+            updateDragged(refCards.current);
         } else {
             refCards.current.style.visibility = 'hidden';
             refIsCardsStored.current = true;
@@ -87,17 +99,17 @@ const Deck = ({ number, cards, order, updateOrder, updateCurrentDragged, cover =
 
     const handleMouseMove = (event) => {
         if (!refIsMouseClick.current) return;
-
+        
         const deltaX = event.clientX - mousePosition[0];
         const deltaY = event.clientY - mousePosition[1];
-
+        
         if (refIsClick.current && ((Math.abs(deltaX) > 5) || (Math.abs(deltaY) > 5))) {
             refIsDragging.current = true;
             refIsClick.current = false;
         };
-
+        
         if (!refIsDragging.current) return;
-
+        
         const posX = deckDragStartPosition[0] + deltaX;
         const posY = deckDragStartPosition[1] + deltaY;
 
@@ -111,26 +123,50 @@ const Deck = ({ number, cards, order, updateOrder, updateCurrentDragged, cover =
             const dragCoords = refMouseDragCoords.current;
             const coordsLastEntry = dragCoords[dragCoords.length - 1] || [];
 
-            if (absDeltaX > absDeltaY) {
-                if (deltaX < -mouseDragLimit) {
-                    if ((coordsLastEntry[0] === 1) && (coordsLastEntry[1] === 0)) return;
-                    dragCoords.push([1, 0]);
-                    incrementMouseDragCount();
-                } else if (deltaX > mouseDragLimit) {
-                    if ((coordsLastEntry[0] === 0) && (coordsLastEntry[1] === 1)) return;
-                    dragCoords.push([0, 1]);
-                    incrementMouseDragCount();
-                };
-            } else {
-                if (deltaY < -mouseDragLimit) {
-                    if ((coordsLastEntry[0] === 1) && (coordsLastEntry[1] === 1)) return;
-                    dragCoords.push([1, 1]);
-                    incrementMouseDragCount();
-                } else if (deltaY > mouseDragLimit) {
-                    if ((coordsLastEntry[0] === 0) && (coordsLastEntry[1] === 0)) return;
-                    dragCoords.push([0, 0]);
-                    incrementMouseDragCount();
-                };
+            if ((deltaX < -mouseDragLimit) && (deltaY < -directionDragLimit)) {
+                /// Up Left
+                /// [x < -LIMIT, _] && [x < -LIMIT, y < -LIMIT]
+                if ((coordsLastEntry[0] === 1) && (coordsLastEntry[1] === 1) && (coordsLastEntry[2] === 0)) return;
+                dragCoords.push([1, 1, 0]);
+                incrementMouseDragCount();
+            } else if ((deltaX < -mouseDragLimit) && (deltaY > directionDragLimit)) {
+                /// Down Left
+                /// [x < -LIMIT, _] && [x < -LIMIT, y > LIMIT]
+                if ((coordsLastEntry[0] === 1) && (coordsLastEntry[1] === 0) && (coordsLastEntry[2] === 1)) return;
+                dragCoords.push([1, 0, 1]);
+                incrementMouseDragCount();
+            } else if ((deltaX > mouseDragLimit) && (deltaY < -directionDragLimit)) {
+                /// Up Right
+                /// [x > LIMIT, _] && [x > LIMIT, y < -LIMIT]
+                if ((coordsLastEntry[0] === 0) && (coordsLastEntry[1] === 1) && (coordsLastEntry[2] === 1)) return;
+                dragCoords.push([0, 1, 1]);
+                incrementMouseDragCount();
+            } else if ((deltaX > mouseDragLimit) && (deltaY > directionDragLimit)) {
+                /// Down Right
+                /// [x > LIMIT, _] && [x > LIMIT, y > LIMIT]
+                if ((coordsLastEntry[0] === 0) && (coordsLastEntry[1] === 1) && (coordsLastEntry[2] === 0)) return;
+                dragCoords.push([0, 1, 0]);
+                incrementMouseDragCount();
+            } else if ((deltaX < -mouseDragLimit) && (absDeltaY <= directionDragLimit)) {
+                /// Left [-x, _]
+                if ((coordsLastEntry[0] === 1) && (coordsLastEntry[1] === 0) && (coordsLastEntry[2] === 0)) return;
+                dragCoords.push([1, 0, 0]);
+                incrementMouseDragCount();
+            } else if ((deltaX > mouseDragLimit) && (absDeltaY <= directionDragLimit)) {
+                /// Right [x, _]
+                if ((coordsLastEntry[0] === 0) && (coordsLastEntry[1] === 0) && (coordsLastEntry[2] === 1)) return;
+                dragCoords.push([0, 0, 1]);
+                incrementMouseDragCount();
+            } else if (deltaY < -mouseDragLimit) {
+                /// Up [_, -y]
+                if ((coordsLastEntry[0] === 1) && (coordsLastEntry[1] === 1) && (coordsLastEntry[2] === 1)) return;
+                dragCoords.push([1, 1, 1]);
+                incrementMouseDragCount();
+            } else if (deltaY > mouseDragLimit) {
+                /// Down [_, y]
+                if ((coordsLastEntry[0] === 0) && (coordsLastEntry[1] === 0) && (coordsLastEntry[2] === 0)) return;
+                dragCoords.push([0, 0, 0]);
+                incrementMouseDragCount();
             };
         };
     };
@@ -258,6 +294,7 @@ const Deck = ({ number, cards, order, updateOrder, updateCurrentDragged, cover =
                 </div>
                 {deckCards?.map((c, cn) => {
                     return <Card label={c.label}
+                        name={c?.name}
                         suit={c.suit}
                         suitsMiddle={c.suitsMiddle}
                         color={c.color}
@@ -265,7 +302,9 @@ const Deck = ({ number, cards, order, updateOrder, updateCurrentDragged, cover =
                         onBringCardToFront={() => bringCardToFront(cn)}
                         forcedPosition={c.forcedPosition}
                         resetId={c.resetId}
-                        flipped={c.flipped}
+                        flipped={c?.flipped}
+                        interactive={c?.interactive}
+                        {...(c.interactive) ? { updateGame: updateGame } : {}}
                         key={`deck 1 card ${cn}`}/>
                 })}
             </div>

@@ -1,6 +1,6 @@
 import { memo, useEffect, useRef } from 'react';
 
-const Card = ({ label, suit, suitsMiddle, color, order, onBringCardToFront, forcedPosition, resetId, flipped, art = '' }) => {
+const Card = ({ label, name, suit, suitsMiddle, color, order, onBringCardToFront, forcedPosition, resetId, flipped, interactive, updateGame = null, art = '' }) => {
     const refCard = useRef(null);
 
     const refMousePosition = useRef([0, 0]); /// Determines click or drag
@@ -23,6 +23,10 @@ const Card = ({ label, suit, suitsMiddle, color, order, onBringCardToFront, forc
 
         const cardInner = event.currentTarget.firstChild;
         cardInner.classList.toggle('card-flipped');
+
+        if (!interactive) return;
+
+        updateGame(name);
     };
     
     const handleMouseUp = (event) => {

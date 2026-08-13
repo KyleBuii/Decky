@@ -41,12 +41,12 @@ const cards = suits.flatMap(({ suit, color }) =>
             (labelIndex % 5) * (cardSize[0] + cardSpreadGap),
             Math.floor(labelIndex / 5) * (cardSize[1] + cardSpreadGap),
         ],
-        flipped: false,
     }))
 );
 const cardsGameSelect = [
     {
         label: 'Blackjack 21',
+        name: 'blackjack21',
         suit: '&spades;',
         suitsMiddle: suitsMiddle['J'],
         color: 'black',
@@ -58,11 +58,15 @@ const cardsGameSelect = [
             (cardSize[1] + cardSpreadGap),
         ],
         flipped: true,
+        interactive: true,
     }
 ];
 
 const App = () => {
     const [deckOrder, setDeckOrder] = useState([]);
+    const [activeGames, setActiveGames] = useState({
+        blackjack21: false,
+    });
 
     const refDecks = useRef(null);
     const refCurrentDragged = useRef(null);
@@ -92,8 +96,21 @@ const App = () => {
         });
     };
 
-    const updateCurrentDragged = (element) => {
+    const updateDragged = (element) => {
         refCurrentDragged.current = element;
+    };
+
+    const updateDraggedPosition = (x, y) => {
+        refCurrentDragged.current.style.transform = `translate(${x}px, ${y}px)`;
+    };
+
+    const updateGame = (game) => {
+        setActiveGames((prev) => {
+            return {
+                ...prev,
+                [game]: !prev[game]
+            }
+        });
     };
 
     return (
@@ -101,17 +118,20 @@ const App = () => {
             <section className='deck-templates'></section>
             <section ref={refDecks}
                 className='decks'>
-                <Game currentDragged={refCurrentDragged}/>
+                {activeGames.blackjack21
+                    && <Game currentDragged={refCurrentDragged}
+                        updateDraggedPosition={updateDraggedPosition}/>}
                 <Deck number={0}
                     cards={cards}
                     order={deckOrder[0]}
                     updateOrder={updateDeckOrder}
-                    updateCurrentDragged={updateCurrentDragged}/>
+                    updateDragged={updateDragged}/>
                 <Deck number={1}
                     cards={cardsGameSelect}
                     order={deckOrder[1]}
                     updateOrder={updateDeckOrder}
-                    updateCurrentDragged={updateCurrentDragged}
+                    updateDragged={updateDragged}
+                    updateGame={updateGame}
                     cover='game-select'/>
                 <ChipStorage/>
             </section>

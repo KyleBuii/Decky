@@ -1,14 +1,15 @@
 import { memo, useState } from 'react';
 import CardSlot from './CardSlot';
 
-const Game = ({ currentDragged }) => {
+const Game = ({ currentDragged, updateDraggedPosition }) => {
     const [scoreOponent, setScoreOponent] = useState(0);
     const [scorePlayer, setScorePlayer] = useState(0);
 
     return (
         <section className='game black-jack-21'>
-            <CardSlot name='BEGIN'
-                currentDragged={currentDragged}/>
+            <CardSlot currentDragged={currentDragged}
+                updateDraggedPosition={updateDraggedPosition}
+                name='BEGIN'/>
             <CardSlot/>
             <CardSlot/>
             <CardSlot/>
