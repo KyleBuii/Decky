@@ -1,7 +1,8 @@
 import { memo, useEffect, useRef, useState } from 'react';
-import Deck from './Deck';
 import ChipStorage from './ChipStorage';
+import Deck from './Deck';
 import Game from './Game';
+import GuidelineToggle from './GuidelineToggle';
 
 const cardSize = [96, 128];
 const cardSpreadGap = 5;
@@ -134,6 +135,7 @@ const App = () => {
                     updateGame={updateGame}
                     cover='game-select'/>
                 <ChipStorage/>
+                <GuidelineToggle/>
             </section>
         </section>
     );

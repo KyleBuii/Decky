@@ -222,6 +222,75 @@ body {
     font-size: 1.3rem;
 }
 
+/// Lightbulb by hasini [https://codepen.io/bright-sun/pen/GRvGaae]
+/// Modified by me
+.guideline-toggle {
+    position: relative;
+    top: 1rem;
+    left: 1rem;
+    width: 40px;
+    height: 40px;
+    background: #444;
+    border: 1px solid black;
+    border-radius: 50%;
+    transform: scaleY(-1);
+
+    &::before {
+        z-index: -1;
+        content: '';
+        position: absolute;
+        top: -25px;
+        left: 11.25px;
+        width: 17.5px;
+        height: 40px;
+        background: #444;
+        border-top: 15px solid #000;
+        border-radius: 5px;
+    }
+
+    &::after {
+        content: '';
+        display: none;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 60px;
+        height: 60px;
+        background: #fff;
+        border-radius: 50%;
+        filter: blur(20px);
+    }
+
+    span {
+        &:nth-child(1) {
+            display: block;
+            position: absolute;
+            top: -8px;
+            left: -2px;
+            width: 15px;
+            height: 15px;
+            background: transparent;
+            transform: rotate(342deg);
+            border-bottom-right-radius: 20px;
+            box-shadow: 10px 10px 0 5px #444;
+        }
+
+        &:nth-child(2) {
+            display: block;
+            position: absolute;
+            top: -8px;
+            right: -2px;
+            width: 15px;
+            height: 15px;
+            background: transparent;
+            transform: rotate(17deg);
+            border-bottom-left-radius: 20px;
+            box-shadow: -10px 10px 0 5px #444;
+        }
+    }
+}
+
 .chip-storage {
     display: flex;
     flex-direction: row;
