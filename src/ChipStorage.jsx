@@ -9,6 +9,9 @@ const ChipStorage = () => {
     const refIsDragging = useRef(false);
 
     const handleMouseDown = (event) => {
+        window.addEventListener('mouseup', handleMouseUp);
+        window.addEventListener('mousemove', handleMouseMove);
+
         refChipStorage.current.style.cursor = 'grabbing';
         refIsDragging.current = true;
         refMousePosition.current = [event.clientX, event.clientY];
@@ -16,6 +19,9 @@ const ChipStorage = () => {
     };
 
     const handleMouseUp = () => {
+        window.removeEventListener('mouseup', handleMouseUp);
+        window.removeEventListener('mousemove', handleMouseMove);
+
         refChipStorage.current.style.cursor = 'grab';
         refIsDragging.current = false;
     };
@@ -36,9 +42,7 @@ const ChipStorage = () => {
         <section ref={refChipStorage}
             className='chip-storage'
             style={{ transform: `translate(${storagePosition[0]}px, ${storagePosition[1]}px)` }}
-            onMouseDown={handleMouseDown}
-            onMouseUp={handleMouseUp}
-            onMouseMove={handleMouseMove}>
+            onMouseDown={handleMouseDown}>
         </section>
     );
 };

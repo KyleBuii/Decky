@@ -17,28 +17,11 @@ const Card = ({ label, name, suit, suitsMiddle, color, order, onBringCardToFront
         refCardPosition.current = forcedPosition;
         refCard.current.style.transform = `translate(${forcedPosition[0]}px, ${forcedPosition[1]}px)`;
     }, [resetId]);
-
-    const handleCardClick = (event) => {
-        refIsClick.current = false;
-
-        const cardInner = event.currentTarget.firstChild;
-        cardInner.classList.toggle('card-flipped');
-
-        if (!interactive) return;
-
-        updateGame(name);
-    };
     
-    const handleMouseUp = (event) => {
-        refCard.current.style.cursor = 'grab';
-
-        refIsMouseClick.current = false;
-        refIsDragging.current = false;
-
-        if (refIsClick.current) handleCardClick(event);
-    };
-
     const handleMouseDown = (event) => {
+        window.addEventListener('mouseup', handleMouseUp);
+        window.addEventListener('mousemove', handleMouseMove);
+
         onBringCardToFront();
 
         refCard.current.style.cursor = 'grabbing';
@@ -49,6 +32,29 @@ const Card = ({ label, name, suit, suitsMiddle, color, order, onBringCardToFront
 
         refMousePosition.current = [event.clientX, event.clientY];
         refCardDragStartPosition.current = [...refCardPosition.current];
+    };
+
+    const handleMouseUp = (event) => {
+        window.removeEventListener('mouseup', handleMouseUp);
+        window.removeEventListener('mousemove', handleMouseMove);
+
+        refCard.current.style.cursor = 'grab';
+
+        refIsMouseClick.current = false;
+        refIsDragging.current = false;
+
+        if (refIsClick.current) handleCardClick(event);
+    };
+
+    const handleCardClick = () => {
+        refIsClick.current = false;
+
+        const cardInner = refCard.current.firstChild;
+        cardInner.classList.toggle('card-flipped');
+
+        if (!interactive) return;
+
+        updateGame(name);
     };
 
     const handleMouseMove = (event) => {
@@ -68,16 +74,14 @@ const Card = ({ label, name, suit, suitsMiddle, color, order, onBringCardToFront
         const posY = refCardDragStartPosition.current[1] + deltaY;
 
         refCardPosition.current = [posX, posY];
-        event.currentTarget.style.transform = `translate(${posX}px, ${posY}px)`;
+        refCard.current.style.transform = `translate(${posX}px, ${posY}px)`;
     };
 
     return (
         <section ref={refCard}
             className='card-container'
             style={{ zIndex: order }}
-            onMouseUp={handleMouseUp}
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}>
+            onMouseDown={handleMouseDown}>
             <div className={`card-container-inner ${flipped ? 'card-flipped' : ''}`}>
                 <div className={`card front ${color} ${art === '' ? '' : art}`}>
                     <div className='card-label left'>

@@ -68,6 +68,7 @@ const App = () => {
     const [activeGames, setActiveGames] = useState({
         blackjack21: false,
     });
+    const [isGuidelines, setIsGuidelines] = useState(false);
 
     const refDecks = useRef(null);
     const refCurrentDragged = useRef(null);
@@ -114,6 +115,11 @@ const App = () => {
         });
     };
 
+    const updateIsGuidelines = (value) => {
+        if (isGuidelines === value) return;
+        setIsGuidelines(value);
+    };
+
     return (
         <section>
             <section className='deck-templates'></section>
@@ -125,17 +131,20 @@ const App = () => {
                 <Deck number={0}
                     cards={cards}
                     order={deckOrder[0]}
+                    isGuidelines={isGuidelines}
                     updateOrder={updateDeckOrder}
                     updateDragged={updateDragged}/>
                 <Deck number={1}
                     cards={cardsGameSelect}
                     order={deckOrder[1]}
+                    isGuidelines={isGuidelines}
                     updateOrder={updateDeckOrder}
                     updateDragged={updateDragged}
                     updateGame={updateGame}
                     cover='game-select'/>
                 <ChipStorage/>
-                <GuidelineToggle/>
+                <GuidelineToggle isGuidelines={isGuidelines}
+                    updateIsGuidelines={updateIsGuidelines}/>
             </section>
         </section>
     );

@@ -5,35 +5,36 @@ import Card from './Card';
 
 /// [1, 1, 1] = up
 /// [0, 1, 1] = up right
+/// [1, 1, 0] = up left
 /// [0, 0, 1] = right
-/// [0, 1, 0] = down right
 /// [0, 0, 0] = down
+/// [0, 1, 0] = down right
 /// [1, 0, 1] = down left
 /// [1, 0, 0] = left
-/// [1, 1, 0] = up left
 const mouseDragDirections = {
-    '100001100001100001': 'shuffle',  /// left      -> right
-    '001100001100001100': 'shuffle',  /// right     -> left
-    '111000111000111000': 'spread',   /// up        -> down
-    '000111000111000111': 'spread',   /// down      -> up
-    '011101011101011101': 'collapse', /// up right  -> down left
-    '101011101011101011': 'collapse', /// down left -> up right
+    '100001100001100001': 'shuffle',  /// left       -> right
+    '001100001100001100': 'shuffle',  /// right      -> left
+    '111000111000111000': 'spread',   /// up         -> down
+    '000111000111000111': 'spread',   /// down       -> up
+    '011101011101011101': 'collapse', /// up right   -> down left
+    '101011101011101011': 'collapse', /// down left  -> up right
 };
-const mouseDragLimit = 40;
-const directionDragLimit = 5;
-const mouseDragCountLimit = 6;
+const MOUSE_DRAG_LIMIT = 40;
+const DIRECTION_DRAG_LIMIT = 20;
+const MOUSE_DRAG_COUNT_LIMIT = 6;
 
-const Deck = ({ number, cards, order, updateOrder, updateDragged, updateGame = null, cover = '' }) => {
-    const [mousePosition, setMousePosition] = useState([0, 0]); /// Determines click or drag
+const Deck = ({ number, cards, order, isGuidelines, updateOrder, updateDragged, updateGame = null, cover = '' }) => {
     const [deckCards, setDeckCards] = useState(cards);
-    const [deckDragStartPosition, setDeckDragStartPosition] = useState([0, 0]);
 
     const refDeck = useRef(null);
     const refCards = useRef(null);
     const refCardsDragger = useRef(null);
-    const refDeckPosition = useRef([0, 0]);
     const refDeckStart = useRef(null);
     const refDeckFront = useRef(null);
+
+    const refMousePosition = useRef([0, 0]);
+    const refDeckDragStartPosition = useRef([0, 0]);
+    const refDeckPosition = useRef([0, 0]);
 
     const refIsMouseClick = useRef(false);  /// If deck was clicked
     const refIsDragging = useRef(false);    /// If deck is dragging
@@ -44,7 +45,34 @@ const Deck = ({ number, cards, order, updateOrder, updateDragged, updateGame = n
     const refMouseDragCoords = useRef([]); /// Stores mouse coords in the format: [1, 1] = up, [0, 1] = right, [0, 0] = down, [1, 0] = left
     const refMouseDragCount = useRef(0);
 
+    const handleMouseDown = (event) => {
+        window.addEventListener('mouseup', handleMouseUp);
+        window.addEventListener('mousemove', handleMouseMove);
+
+        refDeckFront.current.style.cursor = 'grabbing';
+        refDeckStart.current.style.visibility = 'visible';
+
+        const deckStartRect = refDeckStart.current.getBoundingClientRect();
+        const parentRect = refDeckStart.current.parentElement.getBoundingClientRect();
+
+        const posX = (event.clientX - parentRect.left) - (deckStartRect.width / 2);
+        const posY = (event.clientY - parentRect.top) - (deckStartRect.height / 2);
+        refDeckStart.current.style.transform = `translate(${posX}px, ${posY}px)`;
+
+        refIsMouseClick.current = true;
+        refIsDragging.current = false;
+        refIsClick.current = true;
+
+        refMousePosition.current = [event.clientX, event.clientY];
+        refDeckDragStartPosition.current = [...refDeckPosition.current];
+
+        updateOrder(number);
+    };
+
     const handleMouseUp = (event) => {
+        window.removeEventListener('mouseup', handleMouseUp);
+        window.removeEventListener('mousemove', handleMouseMove);
+
         refDeckFront.current.style.cursor = 'grab';
         refDeckStart.current.style.visibility = 'hidden';
 
@@ -76,32 +104,11 @@ const Deck = ({ number, cards, order, updateOrder, updateDragged, updateGame = n
         };
     };
 
-    const handleMouseDown = (event) => {
-        refDeckFront.current.style.cursor = 'grabbing';
-        refDeckStart.current.style.visibility = 'visible';
-
-        const deckStartRect = refDeckStart.current.getBoundingClientRect();
-        const parentRect = refDeckStart.current.parentElement.getBoundingClientRect();
-
-        const posX = (event.clientX - parentRect.left) - (deckStartRect.width / 2);
-        const posY = (event.clientY - parentRect.top) - (deckStartRect.height / 2);
-        refDeckStart.current.style.transform = `translate(${posX}px, ${posY}px)`;
-
-        refIsMouseClick.current = true;
-        refIsDragging.current = false;
-        refIsClick.current = true;
-
-        setMousePosition([event.clientX, event.clientY]);
-        setDeckDragStartPosition([...refDeckPosition.current]);
-
-        updateOrder(number);
-    };
-
     const handleMouseMove = (event) => {
         if (!refIsMouseClick.current) return;
         
-        const deltaX = event.clientX - mousePosition[0];
-        const deltaY = event.clientY - mousePosition[1];
+        const deltaX = event.clientX - refMousePosition.current[0];
+        const deltaY = event.clientY - refMousePosition.current[1];
         
         if (refIsClick.current && ((Math.abs(deltaX) > 5) || (Math.abs(deltaY) > 5))) {
             refIsDragging.current = true;
@@ -110,62 +117,66 @@ const Deck = ({ number, cards, order, updateOrder, updateDragged, updateGame = n
         
         if (!refIsDragging.current) return;
         
-        const posX = deckDragStartPosition[0] + deltaX;
-        const posY = deckDragStartPosition[1] + deltaY;
+        const posX = refDeckDragStartPosition.current[0] + deltaX;
+        const posY = refDeckDragStartPosition.current[1] + deltaY;
 
         refDeckPosition.current = [posX, posY];
-        event.currentTarget.style.transform = `translate(${posX}px, ${posY}px)`;
+        refDeckFront.current.style.transform = `translate(${posX}px, ${posY}px)`;
 
         const absDeltaX = Math.abs(deltaX);
         const absDeltaY = Math.abs(deltaY);
 
-        if ((absDeltaX > mouseDragLimit) || (absDeltaY > mouseDragLimit)) {
+        if ((absDeltaX > MOUSE_DRAG_LIMIT) || (absDeltaY > MOUSE_DRAG_LIMIT)) {
             const dragCoords = refMouseDragCoords.current;
             const coordsLastEntry = dragCoords[dragCoords.length - 1] || [];
 
-            if ((deltaX < -mouseDragLimit) && (deltaY < -directionDragLimit)) {
-                /// Up Left
-                /// [x < -LIMIT, _] && [x < -LIMIT, y < -LIMIT]
-                if ((coordsLastEntry[0] === 1) && (coordsLastEntry[1] === 1) && (coordsLastEntry[2] === 0)) return;
-                dragCoords.push([1, 1, 0]);
-                incrementMouseDragCount();
-            } else if ((deltaX < -mouseDragLimit) && (deltaY > directionDragLimit)) {
-                /// Down Left
-                /// [x < -LIMIT, _] && [x < -LIMIT, y > LIMIT]
-                if ((coordsLastEntry[0] === 1) && (coordsLastEntry[1] === 0) && (coordsLastEntry[2] === 1)) return;
-                dragCoords.push([1, 0, 1]);
-                incrementMouseDragCount();
-            } else if ((deltaX > mouseDragLimit) && (deltaY < -directionDragLimit)) {
-                /// Up Right
-                /// [x > LIMIT, _] && [x > LIMIT, y < -LIMIT]
-                if ((coordsLastEntry[0] === 0) && (coordsLastEntry[1] === 1) && (coordsLastEntry[2] === 1)) return;
-                dragCoords.push([0, 1, 1]);
-                incrementMouseDragCount();
-            } else if ((deltaX > mouseDragLimit) && (deltaY > directionDragLimit)) {
-                /// Down Right
-                /// [x > LIMIT, _] && [x > LIMIT, y > LIMIT]
-                if ((coordsLastEntry[0] === 0) && (coordsLastEntry[1] === 1) && (coordsLastEntry[2] === 0)) return;
-                dragCoords.push([0, 1, 0]);
-                incrementMouseDragCount();
-            } else if ((deltaX < -mouseDragLimit) && (absDeltaY <= directionDragLimit)) {
-                /// Left [-x, _]
-                if ((coordsLastEntry[0] === 1) && (coordsLastEntry[1] === 0) && (coordsLastEntry[2] === 0)) return;
-                dragCoords.push([1, 0, 0]);
-                incrementMouseDragCount();
-            } else if ((deltaX > mouseDragLimit) && (absDeltaY <= directionDragLimit)) {
-                /// Right [x, _]
-                if ((coordsLastEntry[0] === 0) && (coordsLastEntry[1] === 0) && (coordsLastEntry[2] === 1)) return;
-                dragCoords.push([0, 0, 1]);
-                incrementMouseDragCount();
-            } else if (deltaY < -mouseDragLimit) {
+            if ((deltaY < -MOUSE_DRAG_LIMIT) && (absDeltaX < DIRECTION_DRAG_LIMIT)) {
                 /// Up [_, -y]
+                /// [x < DIR_LIMIT && x > -DIR_LIMIT || abs(x) < DIR_LIMIT, y < -MOUSE_LIMIT]
                 if ((coordsLastEntry[0] === 1) && (coordsLastEntry[1] === 1) && (coordsLastEntry[2] === 1)) return;
                 dragCoords.push([1, 1, 1]);
                 incrementMouseDragCount();
-            } else if (deltaY > mouseDragLimit) {
+            } else if ((deltaX > MOUSE_DRAG_LIMIT) && (deltaY < -(DIRECTION_DRAG_LIMIT * 2))) {
+                /// Up Right [x, -y]
+                /// [x > MOUSE_LIMIT, y < -(DIR_LIMIT * 2)]
+                if ((coordsLastEntry[0] === 0) && (coordsLastEntry[1] === 1) && (coordsLastEntry[2] === 1)) return;
+                dragCoords.push([0, 1, 1]);
+                incrementMouseDragCount();
+            } else if ((deltaX < -MOUSE_DRAG_LIMIT) && (deltaY < -(DIRECTION_DRAG_LIMIT * 2))) {
+                /// Up Left [-x, -y]
+                /// [x < -MOUSE_LIMIT, y < -(DIR_LIMIT * 2)]
+                if ((coordsLastEntry[0] === 1) && (coordsLastEntry[1] === 1) && (coordsLastEntry[2] === 0)) return;
+                dragCoords.push([1, 1, 0]);
+                incrementMouseDragCount();
+            } else if ((deltaX > MOUSE_DRAG_LIMIT) && (absDeltaY < DIRECTION_DRAG_LIMIT)) {
+                /// Right [x, _]
+                /// [x > MOUSE_LIMIT, y < DIR_LIMIT && y > -DIR_LIMIT || abs(y) < DIR_LIMIT]
+                if ((coordsLastEntry[0] === 0) && (coordsLastEntry[1] === 0) && (coordsLastEntry[2] === 1)) return;
+                dragCoords.push([0, 0, 1]);
+                incrementMouseDragCount();
+            } else if ((deltaY > MOUSE_DRAG_LIMIT) && (absDeltaX < DIRECTION_DRAG_LIMIT)) {
                 /// Down [_, y]
+                /// [x < DIR_LIMIT && x > -DIR_LIMIT || abs(x) < DIR_LIMIT, y > MOUSE_LIMIT]
                 if ((coordsLastEntry[0] === 0) && (coordsLastEntry[1] === 0) && (coordsLastEntry[2] === 0)) return;
                 dragCoords.push([0, 0, 0]);
+                incrementMouseDragCount();
+            } else if ((deltaX > MOUSE_DRAG_LIMIT) && (deltaY > (DIRECTION_DRAG_LIMIT * 2))) {
+                /// Down Right [x, y]
+                /// [x > MOUSE_LIMIT, y > (DIR_LIMIT * 2)]
+                if ((coordsLastEntry[0] === 0) && (coordsLastEntry[1] === 1) && (coordsLastEntry[2] === 0)) return;
+                dragCoords.push([0, 1, 0]);
+                incrementMouseDragCount();
+            } else if ((deltaX < -MOUSE_DRAG_LIMIT) && (deltaY > (DIRECTION_DRAG_LIMIT * 2))) {
+                /// Down Left [-x, y]
+                /// [x < -MOUSE_LIMIT, y > (DIR_LIMIT * 2)]
+                if ((coordsLastEntry[0] === 1) && (coordsLastEntry[1] === 0) && (coordsLastEntry[2] === 1)) return;
+                dragCoords.push([1, 0, 1]);
+                incrementMouseDragCount();
+            } else if ((deltaX < -MOUSE_DRAG_LIMIT) && (absDeltaY < DIRECTION_DRAG_LIMIT)) {
+                /// Left [-x, _]
+                /// [x < -MOUSE_LIMIT, y < DIR_LIMIT && y > -DIR_LIMIT || abs(y) < DIR_LIMIT]
+                if ((coordsLastEntry[0] === 1) && (coordsLastEntry[1] === 0) && (coordsLastEntry[2] === 0)) return;
+                dragCoords.push([1, 0, 0]);
                 incrementMouseDragCount();
             };
         };
@@ -174,7 +185,7 @@ const Deck = ({ number, cards, order, updateOrder, updateDragged, updateGame = n
     const incrementMouseDragCount = () => {
         refMouseDragCount.current += 1;
 
-        if (refMouseDragCount.current !== mouseDragCountLimit) return;
+        if (refMouseDragCount.current !== MOUSE_DRAG_COUNT_LIMIT) return;
         refMouseDragCount.current = 0;
     
         const directionCode = refMouseDragCoords.current.flat().join('');
@@ -192,6 +203,10 @@ const Deck = ({ number, cards, order, updateOrder, updateDragged, updateGame = n
                 break;
             case 'spread':
                 spreadDeck();
+                playDragAnimation();
+                break;
+            case 'collapse':
+                collapseDeck();
                 playDragAnimation();
                 break;
             default: break;
@@ -230,6 +245,18 @@ const Deck = ({ number, cards, order, updateOrder, updateDragged, updateGame = n
                 return {
                     ...card,
                     forcedPosition: card.defaultPosition,
+                    resetId: card.resetId + 1,
+                }
+            })
+        );
+    };
+
+    const collapseDeck = () => {
+        setDeckCards((cards) =>
+            cards.map((card) => {
+                return {
+                    ...card,
+                    forcedPosition: [0, 0],
                     resetId: card.resetId + 1,
                 }
             })
@@ -275,16 +302,25 @@ const Deck = ({ number, cards, order, updateOrder, updateDragged, updateGame = n
             style={{ zIndex: order }}>
             <div ref={refDeckStart}
                 className='deck-start'>
-                <IconContext.Provider value={{ size: '4rem', color: '#ffadad', className: 'global-class-name' }}>
+                <IconContext.Provider value={{ size: '4rem', color: '#ffadad', style: { margin: '2.5rem' }, className: 'global-class-name' }}>
                     <IoIosMove/>
                 </IconContext.Provider>
+                {(isGuidelines)
+                    && <div>
+                        <div className='drag-area up'></div>
+                        <div className='drag-area up-right'></div>
+                        <div className='drag-area up-left'></div>
+                        <div className='drag-area right'></div>
+                        <div className='drag-area down'></div>
+                        <div className='drag-area down-right'></div>
+                        <div className='drag-area down-left'></div>
+                        <div className='drag-area left'></div>
+                    </div>}
             </div>
             <div ref={refDeckFront}
                 style={{ backgroundImage: `url(/assets/deck-${cover ? `${cover}-` : ''}front.webp)` }}
                 className='deck-front'
-                onMouseUp={handleMouseUp}
-                onMouseDown={handleMouseDown}
-                onMouseMove={handleMouseMove}></div>
+                onMouseDown={handleMouseDown}></div>
             <div ref={refCards}
                 className='cards'>
                 <div ref={refCardsDragger}
