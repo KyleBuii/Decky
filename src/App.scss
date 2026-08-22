@@ -168,6 +168,8 @@ body {
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
     user-select: none;
+    transition-property: rotate;
+    transition-duration: 0.3s;
 
     &.black {
         color: black;
@@ -190,6 +192,10 @@ body {
         &.red {
             background-image: url(/assets/card-red.webp);
         }
+    }
+
+    &.active {
+        rotate: 90deg;
     }
 }
 
@@ -270,11 +276,17 @@ body {
     width: 6rem;
     height: 8rem;
     margin: 1rem;
-    border: 3px solid rgb(var(--template-color));
+    border: 1px solid rgb(var(--template-color));
     border-radius: 5px;
     padding: 1px;
     background-color: rgba(var(--template-color), 0.25);
-    font-size: 1.3rem;
+
+    &.holder {
+        top: -8rem;
+        left: 1rem;
+        rotate: 90deg;
+        writing-mode: sideways-lr;
+    }
 }
 
 .guideline-toggle {
@@ -458,28 +470,27 @@ body {
     height: 8rem;
     margin: calc(1rem + 3px);
     padding: 1px;
-    font-size: 1.3rem;
 }
 
 .black-jack-21 {
     .slot {
-        &:nth-child(2), &:nth-child(3) {
+        &:nth-child(3), &:nth-child(4) {
             background-color: rgba(var(--additional-color), 0.25);
         }
 
-        &:nth-child(1) { /// Begin
+        &:nth-child(2) { /// Begin
             transform: translateX(14rem);
         }
 
-        &:nth-child(3) { /// Top right
+        &:nth-child(4) { /// Top right
             transform: translateX(7rem);
         }
         
-        &:nth-child(4) { /// Bottom left
+        &:nth-child(5) { /// Bottom left
             transform: translateY(9rem);
         }
 
-        &:nth-child(5) { /// Bottom right
+        &:nth-child(6) { /// Bottom right
             transform: translate(7rem, 9rem);
         }
     }

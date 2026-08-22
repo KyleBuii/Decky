@@ -72,6 +72,7 @@ const App = () => {
 
     const refDecks = useRef(null);
     const refCurrentDragged = useRef(null);
+    const refCurrentCard = useRef(null);
 
     useEffect(() => {
         const newDeckOrder = Array.from({ length: refDecks.current.children.length }, (_, i) => i + 1);
@@ -120,6 +121,10 @@ const App = () => {
         setIsGuidelines(value);
     };
 
+    const updateCurrentCard = (element) => {
+        refCurrentCard.current = element;
+    };
+
     return (
         <section>
             <section className='deck-templates'></section>
@@ -127,19 +132,22 @@ const App = () => {
                 className='decks'>
                 {activeGames.blackjack21
                     && <Game currentDragged={refCurrentDragged}
+                        currentClickedCard={refCurrentCard}
                         updateDraggedPosition={updateDraggedPosition}/>}
                 <Deck number={0}
                     cards={cards}
                     order={deckOrder[0]}
                     isGuidelines={isGuidelines}
                     updateOrder={updateDeckOrder}
-                    updateDragged={updateDragged}/>
+                    updateDragged={updateDragged}
+                    updateCurrentCard={updateCurrentCard}/>
                 <Deck number={1}
                     cards={cardsGameSelect}
                     order={deckOrder[1]}
                     isGuidelines={isGuidelines}
                     updateOrder={updateDeckOrder}
                     updateDragged={updateDragged}
+                    updateCurrentCard={updateCurrentCard}
                     updateGame={updateGame}
                     cover='game-select'/>
                 <ChipStorage/>

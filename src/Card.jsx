@@ -1,6 +1,8 @@
-import { memo, useEffect, useRef } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 
-const Card = ({ label, name, suit, suitsMiddle, color, order, onBringCardToFront, forcedPosition, resetId, flipped, interactive, updateGame = null, art = '' }) => {
+const Card = ({ label, name, suit, suitsMiddle, color, order, onBringCardToFront, forcedPosition, resetId, flipped, interactive, updateCurrentCard, updateGame = null, art = '' }) => {
+    const [isRotated, setIsRotated] = useState(false);
+
     const refCard = useRef(null);
 
     const refMousePosition = useRef([0, 0]); /// Determines click or drag
@@ -54,7 +56,9 @@ const Card = ({ label, name, suit, suitsMiddle, color, order, onBringCardToFront
 
         if (!interactive) return;
 
+        updateCurrentCard(refCard.current);
         updateGame(name);
+        setIsRotated(!isRotated);
     };
 
     const handleMouseMove = (event) => {
@@ -83,7 +87,7 @@ const Card = ({ label, name, suit, suitsMiddle, color, order, onBringCardToFront
             style={{ zIndex: order }}
             onMouseDown={handleMouseDown}>
             <div className={`card-container-inner ${flipped ? 'card-flipped' : ''}`}>
-                <div className={`card front ${color} ${art === '' ? '' : art}`}>
+                <div className={`card front ${color} ${(isRotated) ? 'active' : ''} ${(art === '') ? '' : art}`}>
                     <div className='card-label left'>
                         <span>{label}</span>
                         <span dangerouslySetInnerHTML={{ __html: suit }}></span>
@@ -103,7 +107,7 @@ const Card = ({ label, name, suit, suitsMiddle, color, order, onBringCardToFront
                         <span dangerouslySetInnerHTML={{ __html: suit }}></span>
                     </div>
                 </div>
-                <div className={`card back ${color}`}></div>
+                <div className={`card back ${color} ${(isRotated) ? 'active' : ''}`}></div>
             </div>
         </section>
     );

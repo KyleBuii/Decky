@@ -1,10 +1,10 @@
 import { memo, useRef } from 'react';
 
-const CardSlot = ({ currentDragged, updateDraggedPosition, name = '' }) => {
+const CardSlot = ({ currentDragged, updateDraggedPosition, isHolder = false, name = '' }) => {
     const refSlot = useRef(null);
 
     const handleClick = (event) => {
-        if (!currentDragged.current) return;
+        if (!currentDragged?.current) return;
 
         const rectSlot = refSlot.current.getBoundingClientRect();
         updateDraggedPosition(rectSlot.x, rectSlot.y);
@@ -12,7 +12,7 @@ const CardSlot = ({ currentDragged, updateDraggedPosition, name = '' }) => {
 
     return (
         <section ref={refSlot}
-            className='slot'
+            className={`slot ${(isHolder) ? 'holder' : ''}`}
             onClick={handleClick}>
             {(name !== '')
                 ? <span>{name}</span>
