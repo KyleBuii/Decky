@@ -1,19 +1,11 @@
-import { memo, useRef } from 'react';
+import { memo, useEffect, useRef } from 'react';
 
-const CardSlot = ({ currentDragged, updateDraggedPosition, isHolder = false, name = '' }) => {
+const CardSlot = ({ slot, startGame, isHolder = false, name = '' }) => {
     const refSlot = useRef(null);
-
-    const handleClick = (event) => {
-        if (!currentDragged?.current) return;
-
-        const rectSlot = refSlot.current.getBoundingClientRect();
-        updateDraggedPosition(rectSlot.x, rectSlot.y);
-    };
 
     return (
         <section ref={refSlot}
-            className={`slot ${(isHolder) ? 'holder' : ''}`}
-            onClick={handleClick}>
+            className={`slot ${(isHolder) ? 'holder' : ''}`}>
             {(name !== '')
                 ? <span>{name}</span>
                 : <></>}

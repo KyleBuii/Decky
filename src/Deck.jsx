@@ -23,7 +23,7 @@ const MOUSE_DRAG_LIMIT = 40;
 const DIRECTION_DRAG_LIMIT = 20;
 const MOUSE_DRAG_COUNT_LIMIT = 6;
 
-const Deck = ({ number, cards, order, isGuidelines, updateOrder, updateDragged, updateCurrentCard, updateGame = null, cover = '' }) => {
+const Deck = ({ number, cards, order, isGuidelines, updateOrder, updateCurrentCard, updateGame = null, cover = '' }) => {
     const [deckCards, setDeckCards] = useState(cards);
 
     const refDeck = useRef(null);
@@ -96,8 +96,6 @@ const Deck = ({ number, cards, order, isGuidelines, updateOrder, updateDragged, 
 
             refIsCardsDragging.current = true;
             refIsCardsStored.current = false;
-
-            updateDragged(refCards.current);
         } else {
             refCards.current.style.visibility = 'hidden';
             refIsCardsStored.current = true;

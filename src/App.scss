@@ -290,8 +290,10 @@ body {
 }
 
 .guideline-toggle {
-    position: relative;
-    inset: 1rem 0 0 1rem;
+    position: absolute;
+    top: 9.4rem;
+    left: 12.8rem;
+    margin: 1rem;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -356,11 +358,12 @@ body {
 .chip-storage {
     display: flex;
     flex-direction: row;
-    position: relative;
-    top: 1rem;
-    left: 1rem;
+    position: absolute;
+    top: 9.4rem;
+    left: 0;
     width: 11rem;
     height: 7rem;
+    margin: 1rem;
     background-color: rgb(228, 163, 103);
     background:
         /// Wood grain

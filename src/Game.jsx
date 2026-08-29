@@ -1,10 +1,11 @@
 import { memo, useRef, useState } from 'react';
 import CardSlot from './CardSlot';
 
-const Game = ({ currentDragged, currentClickedCard, updateDraggedPosition }) => {
+const Game = ({ currentClickedCard }) => {
     const rectClickedCard = currentClickedCard.current.getBoundingClientRect();
 
     const [gamePosition, setGamePosition] = useState([rectClickedCard.x - 34, rectClickedCard.y + 110]);
+    const [slottedCards, setSlottedCards] = useState({});
     const [scoreOponent, setScoreOponent] = useState(0);
     const [scorePlayer, setScorePlayer] = useState(0);
 
@@ -41,6 +42,13 @@ const Game = ({ currentDragged, currentClickedCard, updateDraggedPosition }) => 
         const posY = refStartPosition.current[1] + deltaY;
 
         setGamePosition([posX, posY]);
+
+        const clickedCardElement = currentClickedCard.current;
+        clickedCardElement.style.transform = `translate(${gamePosition[0]}px, ${gamePosition[1]}px)`;
+    };
+
+    const startGame = () => {
+
     };
 
     return (
@@ -48,13 +56,12 @@ const Game = ({ currentDragged, currentClickedCard, updateDraggedPosition }) => 
             style={{ transform: `translate(${gamePosition[0]}px, ${gamePosition[1]}px)` }}>
             <CardSlot isHolder={true}
                 name='HOLDER'/>
-            <CardSlot currentDragged={currentDragged}
-                updateDraggedPosition={updateDraggedPosition}
-                name='BEGIN'/>
-            <CardSlot/>
-            <CardSlot/>
-            <CardSlot/>
-            <CardSlot/>
+            <CardSlot name='BEGIN'
+                startGame={startGame}/>
+            <CardSlot slot={1}/>
+            <CardSlot slot={2}/>
+            <CardSlot slot={3}/>
+            <CardSlot slot={4}/>
             <section ref={refDragger}
                 className='score'
                 onMouseDown={handleMouseDown}>

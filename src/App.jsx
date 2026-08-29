@@ -71,7 +71,6 @@ const App = () => {
     const [isGuidelines, setIsGuidelines] = useState(false);
 
     const refDecks = useRef(null);
-    const refCurrentDragged = useRef(null);
     const refCurrentCard = useRef(null);
 
     useEffect(() => {
@@ -99,14 +98,6 @@ const App = () => {
         });
     };
 
-    const updateDragged = (element) => {
-        refCurrentDragged.current = element;
-    };
-
-    const updateDraggedPosition = (x, y) => {
-        refCurrentDragged.current.style.transform = `translate(${x}px, ${y}px)`;
-    };
-
     const updateGame = (game) => {
         setActiveGames((prev) => {
             return {
@@ -127,33 +118,28 @@ const App = () => {
 
     return (
         <section>
-            <section className='deck-templates'></section>
+            {(activeGames.blackjack21)
+                && <Game currentClickedCard={refCurrentCard}/>}
             <section ref={refDecks}
                 className='decks'>
-                {activeGames.blackjack21
-                    && <Game currentDragged={refCurrentDragged}
-                        currentClickedCard={refCurrentCard}
-                        updateDraggedPosition={updateDraggedPosition}/>}
                 <Deck number={0}
                     cards={cards}
                     order={deckOrder[0]}
                     isGuidelines={isGuidelines}
                     updateOrder={updateDeckOrder}
-                    updateDragged={updateDragged}
                     updateCurrentCard={updateCurrentCard}/>
                 <Deck number={1}
                     cards={cardsGameSelect}
                     order={deckOrder[1]}
                     isGuidelines={isGuidelines}
                     updateOrder={updateDeckOrder}
-                    updateDragged={updateDragged}
                     updateCurrentCard={updateCurrentCard}
                     updateGame={updateGame}
                     cover='game-select'/>
-                <ChipStorage/>
-                <GuidelineToggle isGuidelines={isGuidelines}
-                    updateIsGuidelines={updateIsGuidelines}/>
             </section>
+            <ChipStorage/>
+            <GuidelineToggle isGuidelines={isGuidelines}
+                updateIsGuidelines={updateIsGuidelines}/>
         </section>
     );
 };
