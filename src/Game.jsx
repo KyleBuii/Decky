@@ -42,9 +42,6 @@ const Game = ({ currentClickedCard }) => {
         const posY = refStartPosition.current[1] + deltaY;
 
         setGamePosition([posX, posY]);
-
-        const clickedCardElement = currentClickedCard.current;
-        clickedCardElement.style.transform = `translate(${gamePosition[0]}px, ${gamePosition[1]}px)`;
     };
 
     const startGame = () => {
