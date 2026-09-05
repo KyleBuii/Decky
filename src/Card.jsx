@@ -1,9 +1,13 @@
 import { memo, useEffect, useRef, useState } from 'react';
+import Game from './Game';
 
-const Card = ({ label, name, suit, suitsMiddle, color, order, onBringCardToFront, forcedPosition, resetId, flipped, interactive, updateCurrentCard, updateGame = null, art = '' }) => {
+const Card = ({ label, name, suit, suitsMiddle, color, order, onBringCardToFront, forcedPosition, resetId, flipped, interactive, moveDeck }) => {
+    const [cardName, setCardName] = useState(name);
     const [isRotated, setIsRotated] = useState(false);
+    const [isActive, setIsAcitve] = useState(false);
 
     const refCard = useRef(null);
+    const refCardInner = useRef(null);
 
     const refMousePosition = useRef([0, 0]); /// Determines click or drag
     const refCardDragStartPosition = useRef([0, 0]);
@@ -26,8 +30,6 @@ const Card = ({ label, name, suit, suitsMiddle, color, order, onBringCardToFront
 
         onBringCardToFront();
 
-        refCard.current.style.cursor = 'grabbing';
-
         refIsMouseClick.current = true;
         refIsDragging.current = false;
         refIsClick.current = true;
@@ -40,8 +42,6 @@ const Card = ({ label, name, suit, suitsMiddle, color, order, onBringCardToFront
         window.removeEventListener('mouseup', handleMouseUp);
         window.removeEventListener('mousemove', handleMouseMove);
 
-        refCard.current.style.cursor = 'grab';
-
         refIsMouseClick.current = false;
         refIsDragging.current = false;
 
@@ -49,15 +49,13 @@ const Card = ({ label, name, suit, suitsMiddle, color, order, onBringCardToFront
     };
 
     const handleCardClick = () => {
-        refIsClick.current = false;
+        setIsAcitve(!isActive);
 
-        const cardInner = refCard.current.firstChild;
-        cardInner.classList.toggle('card-flipped');
+        refIsClick.current = false;
+        refCardInner.current.classList.toggle('card-flipped');
 
         if (!interactive) return;
 
-        updateCurrentCard(refCard.current);
-        updateGame(name);
         setIsRotated(!isRotated);
     };
 
@@ -84,23 +82,23 @@ const Card = ({ label, name, suit, suitsMiddle, color, order, onBringCardToFront
     return (
         <section ref={refCard}
             className='card-container'
-            style={{ zIndex: order }}
-            onMouseDown={handleMouseDown}>
-            <div className={`card-container-inner ${flipped ? 'card-flipped' : ''}`}>
-                <div className={`card front ${color} ${(isRotated) ? 'active' : ''} ${(art === '') ? '' : art}`}>
+            style={{ zIndex: order }}>
+            {(isActive) && (cardName === 'blackjack21')
+                && <Game moveDeck={moveDeck}/>}
+            <div ref={refCardInner}
+                className={`card-container-inner ${(flipped) ? 'card-flipped' : ''}`}
+                onMouseDown={handleMouseDown}>
+                <div className={`card front ${color} ${(isRotated) ? 'active' : ''}`}>
                     <div className='card-label left'>
                         <span>{label}</span>
                         <span dangerouslySetInnerHTML={{ __html: suit }}></span>
                     </div>
                     <div className='card-center'>
-                        {(art === '')
-                            ? suitsMiddle.map((suitNum) => {
-                                return <span dangerouslySetInnerHTML={{ __html: suit }}
-                                    className={suitNum}
-                                    key={`${label} suit ${suitNum} ${art}`}></span>
-                            })
-                            : <></>
-                        }
+                        {suitsMiddle.map((suitNum) => {
+                            return <span dangerouslySetInnerHTML={{ __html: suit }}
+                                className={suitNum}
+                                key={`${label} suit ${suitNum}`}></span>
+                        })}
                     </div>
                     <div className='card-label right'>
                         <span>{label}</span>

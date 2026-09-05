@@ -1,7 +1,6 @@
 import { memo, useEffect, useRef, useState } from 'react';
 import ChipStorage from './ChipStorage';
 import Deck from './Deck';
-import Game from './Game';
 import GuidelineToggle from './GuidelineToggle';
 
 const cardSize = [96, 128];
@@ -65,13 +64,10 @@ const cardsGameSelect = [
 
 const App = () => {
     const [deckOrder, setDeckOrder] = useState([]);
-    const [activeGames, setActiveGames] = useState({
-        blackjack21: false,
-    });
     const [isGuidelines, setIsGuidelines] = useState(false);
 
     const refDecks = useRef(null);
-    const refCurrentCard = useRef(null);
+    const refPlayingDeck = useRef(null);
 
     useEffect(() => {
         const newDeckOrder = Array.from({ length: refDecks.current.children.length }, (_, i) => i + 1);
@@ -98,43 +94,27 @@ const App = () => {
         });
     };
 
-    const updateGame = (game) => {
-        setActiveGames((prev) => {
-            return {
-                ...prev,
-                [game]: !prev[game]
-            }
-        });
-    };
-
     const updateIsGuidelines = (value) => {
         if (isGuidelines === value) return;
         setIsGuidelines(value);
     };
 
-    const updateCurrentCard = (element) => {
-        refCurrentCard.current = element;
-    };
-
     return (
         <section>
-            {(activeGames.blackjack21)
-                && <Game currentClickedCard={refCurrentCard}/>}
             <section ref={refDecks}
                 className='decks'>
-                <Deck number={0}
+                <Deck ref={refPlayingDeck}
+                    number={0}
                     cards={cards}
                     order={deckOrder[0]}
                     isGuidelines={isGuidelines}
-                    updateOrder={updateDeckOrder}
-                    updateCurrentCard={updateCurrentCard}/>
+                    updateOrder={updateDeckOrder}/>
                 <Deck number={1}
                     cards={cardsGameSelect}
                     order={deckOrder[1]}
                     isGuidelines={isGuidelines}
                     updateOrder={updateDeckOrder}
-                    updateCurrentCard={updateCurrentCard}
-                    updateGame={updateGame}
+                    refPlayingDeck={refPlayingDeck}
                     cover='game-select'/>
             </section>
             <ChipStorage/>

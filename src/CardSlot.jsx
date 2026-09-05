@@ -1,16 +1,21 @@
-import { memo, useEffect, useRef } from 'react';
+import { forwardRef, memo, useRef } from 'react';
 
-const CardSlot = ({ slot, startGame, isHolder = false, name = '' }) => {
-    const refSlot = useRef(null);
+const CardSlot = forwardRef(({ slot, click, isHolder = false, name = '' }, ref) => {
+    const handleClick = () => {
+        if (!click) return;
+
+        click();
+    };
 
     return (
-        <section ref={refSlot}
-            className={`slot ${(isHolder) ? 'holder' : ''}`}>
+        <section ref={ref}
+            className={`slot ${(isHolder) ? 'holder' : ''}`}
+            onClick={handleClick}>
             {(name !== '')
                 ? <span>{name}</span>
                 : <></>}
         </section>
     );
-};
+});
 
 export default memo(CardSlot);

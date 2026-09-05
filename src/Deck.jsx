@@ -1,4 +1,4 @@
-import { memo, useRef, useState } from 'react';
+import { forwardRef, memo, useImperativeHandle, useRef, useState } from 'react';
 import { IconContext } from 'react-icons';
 import { IoIosMove } from 'react-icons/io';
 import Card from './Card';
@@ -23,14 +23,15 @@ const MOUSE_DRAG_LIMIT = 40;
 const DIRECTION_DRAG_LIMIT = 20;
 const MOUSE_DRAG_COUNT_LIMIT = 6;
 
-const Deck = ({ number, cards, order, isGuidelines, updateOrder, updateCurrentCard, updateGame = null, cover = '' }) => {
+const Deck = forwardRef(({ number, cards, order, isGuidelines, updateOrder, refPlayingDeck, cover = '' }, ref) => {
     const [deckCards, setDeckCards] = useState(cards);
 
     const refDeck = useRef(null);
-    const refCards = useRef(null);
-    const refCardsDragger = useRef(null);
     const refDeckStart = useRef(null);
     const refDeckFront = useRef(null);
+
+    const refCards = useRef(null);
+    const refCardsDragger = useRef(null);
 
     const refMousePosition = useRef([0, 0]);
     const refDeckDragStartPosition = useRef([0, 0]);
@@ -45,11 +46,18 @@ const Deck = ({ number, cards, order, isGuidelines, updateOrder, updateCurrentCa
     const refMouseDragCoords = useRef([]); /// Stores mouse coords in the format: [1, 1] = up, [0, 1] = right, [0, 0] = down, [1, 0] = left
     const refMouseDragCount = useRef(0);
 
+    useImperativeHandle(ref, () => ({
+        element: refDeck.current,
+        moveTo(x, y) {
+            refDeckPosition.current = [x, y];
+            refDeckFront.current.style.transform = `translate(${x}px, ${y}px)`;
+        },
+    }));
+
     const handleMouseDown = (event) => {
         window.addEventListener('mouseup', handleMouseUp);
         window.addEventListener('mousemove', handleMouseMove);
 
-        refDeckFront.current.style.cursor = 'grabbing';
         refDeckStart.current.style.visibility = 'visible';
 
         const deckStartRect = refDeckStart.current.getBoundingClientRect();
@@ -73,7 +81,6 @@ const Deck = ({ number, cards, order, isGuidelines, updateOrder, updateCurrentCa
         window.removeEventListener('mouseup', handleMouseUp);
         window.removeEventListener('mousemove', handleMouseMove);
 
-        refDeckFront.current.style.cursor = 'grab';
         refDeckStart.current.style.visibility = 'hidden';
 
         refMouseDragCount.current = 0;
@@ -294,6 +301,17 @@ const Deck = ({ number, cards, order, isGuidelines, updateOrder, updateCurrentCa
         });
     };
 
+    const moveDeck = (x, y) => {
+        const rectDeckPlaying = refPlayingDeck.current.element.getBoundingClientRect();
+
+        const deltaX = x - rectDeckPlaying.x;
+        const deltaY = y - rectDeckPlaying.y;
+
+        refPlayingDeck.current.moveTo(deltaX, deltaY);
+
+        updateOrder(0);
+    };
+
     return (
         <section ref={refDeck}
             className='deck'
@@ -338,13 +356,12 @@ const Deck = ({ number, cards, order, isGuidelines, updateOrder, updateCurrentCa
                         resetId={c.resetId}
                         flipped={c?.flipped}
                         interactive={c?.interactive}
-                        updateCurrentCard={updateCurrentCard}
-                        {...(c.interactive) ? { updateGame: updateGame } : {}}
+                        moveDeck={moveDeck}
                         key={`deck 1 card ${cn}`}/>
                 })}
             </div>
         </section>
     );
-};
+});
 
 export default memo(Deck);

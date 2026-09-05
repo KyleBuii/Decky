@@ -12,7 +12,6 @@ const ChipStorage = () => {
         window.addEventListener('mouseup', handleMouseUp);
         window.addEventListener('mousemove', handleMouseMove);
 
-        refChipStorage.current.style.cursor = 'grabbing';
         refIsDragging.current = true;
         refMousePosition.current = [event.clientX, event.clientY];
         refStartPosition.current = [...storagePosition];
@@ -22,7 +21,6 @@ const ChipStorage = () => {
         window.removeEventListener('mouseup', handleMouseUp);
         window.removeEventListener('mousemove', handleMouseMove);
 
-        refChipStorage.current.style.cursor = 'grab';
         refIsDragging.current = false;
     };
 

@@ -14,8 +14,6 @@ const GuidelineToggle = ({ isGuidelines, updateIsGuidelines }) => {
     const handleMouseDown = (event) => {
         window.addEventListener('mouseup', handleMouseUp);
         window.addEventListener('mousemove', handleMouseMove);
-
-        refGuidelineToggle.current.style.cursor = 'grabbing';
         
         refIsMouseClick.current = true;
         refIsDragging.current = false;
@@ -28,8 +26,6 @@ const GuidelineToggle = ({ isGuidelines, updateIsGuidelines }) => {
     const handleMouseUp = (event) => {
         window.removeEventListener('mouseup', handleMouseUp);
         window.removeEventListener('mousemove', handleMouseMove);
-
-        refGuidelineToggle.current.style.cursor = 'grab';
 
         refIsMouseClick.current = false;
         refIsDragging.current = false;
